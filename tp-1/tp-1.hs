@@ -21,7 +21,7 @@ maxDelPar (n,m) = if (n > m)
 
 2. Ejemplos que denoten 10 utilizando las cuatro funciones anteriores:
 
-a. maxDelPar(divisionYResto (sucesor 9) (sumar 1 3))
+a. maxDelPar(divisionYResto (sucesor 9) (sumar 4 (-3)))
 b. sumar (maxDelPar(divisionYResto 9 5)) (sucesor 5)
 c. sucesor (sumar (maxDelPar(divisionYResto 10 3)) 6)
 d. maxDelPar(divisionYResto (sumar 70 30) (sucesor 9))
