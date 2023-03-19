@@ -107,7 +107,7 @@ implica True False = False
 implica _ _ = True
 
 yTambien :: Bool -> Bool -> Bool
-yTambien True True = True
+yTambien True p = p
 yTambien _ _ = False
 
 oBien :: Bool -> Bool -> Bool
