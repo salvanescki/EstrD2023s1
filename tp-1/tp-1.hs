@@ -112,8 +112,7 @@ yTambien _ _ = False
 
 oBien :: Bool -> Bool -> Bool
 oBien True _ = True
-oBien _ True = True
-oBien _ _ = False
+oBien _ p = p
 
 ------------------------------------Registros------------------------------------
 
