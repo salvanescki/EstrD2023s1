@@ -22,6 +22,47 @@ laQueEsMayor p1 p2 = if esMayorQueLaOtra p1 p2
                         then p1
                         else p2
 
+-- Funciones de la práctica 1 adaptadas a la práctica actual
+
+data TipoDePokemon = Agua | Fuego | Planta
+        deriving Show
+
+data Pokemon = ConsPokemon TipoDePokemon Int
+--                          TipoDePokemon PorcentajeEnergia
+        deriving Show
+
+data Entrenador = ConsEntrenador String [Pokemon]
+--                              Nombre ListaPokemons
+        deriving Show
+
+tipoDe :: Pokemon -> TipoDePokemon
+tipoDe (ConsPokemon t p) = t
+
+esMismoTipoQue :: TipoDePokemon -> TipoDePokemon -> Bool
+esMismoTipoQue Fuego Fuego = True
+esMismoTipoQue Agua Agua = True
+esMismoTipoQue Planta Planta = True
+esMismoTipoQue _ _ = False
+
+esTipoSuperiorA :: TipoDePokemon -> TipoDePokemon -> Bool
+esTipoSuperiorA Agua Fuego = True
+esTipoSuperiorA Fuego Planta = True
+esTipoSuperiorA Planta Agua = True
+esTipoSuperiorA _ _ = False
+
+superaA :: Pokemon -> Pokemon -> Bool
+superaA p1 p2 = esTipoSuperiorA (tipoDe p1)(tipoDe p2)
+{-
+
+cantidadDePokemonDe :: TipoDePokemon -> Entrenador -> Int
+cantidadDePokemonDe tipo (E n p1 p2) = unoSiCeroSino(esMismoTipoQue (tipoDe p1) tipo) + unoSiCeroSino(esMismoTipoQue (tipoDe p2) tipo)
+
+listaPokemonDeEntrenador :: Entrenador -> [Pokemon]
+listaPokemonDeEntrenador (E n p1 p2) = [p1, p2]
+
+juntarPokemon :: (Entrenador, Entrenador) -> [Pokemon]
+juntarPokemon (e1,e2) = listaPokemonDeEntrenador e1 ++ listaPokemonDeEntrenador e2
+-}
 ------------------------------------Funciones auxiliares--------------------------------------
 
 agregarSi :: a -> Bool -> [a] -> [a]
@@ -168,8 +209,6 @@ mayoresA 0 ps = ps
 mayoresA _ [] = []
 mayoresA n (p:ps) = agregarSi p (edad p > n) (mayoresA n ps)
 
--- 2
-
 sumatoriaEdades :: [Persona] -> Int
 sumatoriaEdades [] = 0
 sumatoriaEdades (p:ps) = edad p + sumatoriaEdades ps
@@ -178,9 +217,26 @@ promedioEdad :: [Persona] -> Int
 -- PRECOND: La lista posee al menos una persona
 promedioEdad ps = div (sumatoriaEdades ps) (longitud ps)
 
--- 3
-
 elMasViejo :: [Persona] -> Persona
 -- PRECOND: La lista posee al menos una persona
 elMasViejo [p] = p
 elMasViejo (p:ps) = laQueEsMayor p (elMasViejo ps)
+
+-- 2
+
+cantPokemon :: Entrenador -> Int
+cantPokemon (ConsEntrenador _ pks) = longitud pks
+
+cantPokemonDe :: TipoDePokemon -> Entrenador -> Int
+cantPokemonDe tipo (ConsEntrenador n []) = 0
+cantPokemonDe tipo (ConsEntrenador n (p:pks)) = unoSiCeroSino (esMismoTipoQue tipo (tipoDe p)) + cantPokemonDe tipo (ConsEntrenador n pks)
+
+{-
+cuantosDeTipo_De_LeGananATodosLosDe_ :: TipoDePokemon -> Entrenador -> Entrenador -> Int
+
+
+esMaestroPokemon :: Entrenador -> Bool
+
+-}
+
+-- 3
