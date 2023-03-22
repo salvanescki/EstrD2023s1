@@ -7,6 +7,27 @@ unoSiCeroSino :: Bool -> Int
 unoSiCeroSino True = 1
 unoSiCeroSino False = 0
 
+data Persona = P String Int
+        --      Nombre Edad
+        deriving Show
+
+edad :: Persona -> Int
+edad (P n e) = e
+
+esMayorQueLaOtra :: Persona -> Persona -> Bool
+esMayorQueLaOtra p1 p2 = edad p1 > edad p2
+
+laQueEsMayor :: Persona -> Persona -> Persona
+laQueEsMayor p1 p2 = if esMayorQueLaOtra p1 p2
+                        then p1
+                        else p2
+
+------------------------------------Funciones auxiliares--------------------------------------
+
+agregarSi :: a -> Bool -> [a] -> [a]
+agregarSi e True l = e : l
+agregarSi _ _ l = l
+
 ------------------------------------Recursión sobre Listas------------------------------------
 -- 1
 
@@ -60,17 +81,13 @@ apariciones e (x:xs) = unoSiCeroSino(e == x) + apariciones e xs
 
 losMenoresA :: Int -> [Int] -> [Int]
 losMenoresA _ [] = []
-losMenoresA k (n:ns) = if n < k
-                        then n : losMenoresA k ns
-                        else losMenoresA k ns
+losMenoresA k (n:ns) = agregarSi n (n < k) (losMenoresA k ns)
 
 -- 10
 
 lasDeLongitudMayorA :: Int -> [[a]] -> [[a]]
 lasDeLongitudMayorA _ [] = []
-lasDeLongitudMayorA n (l:ls) = if longitud l > n
-                                then l : lasDeLongitudMayorA n ls
-                                else lasDeLongitudMayorA n ls
+lasDeLongitudMayorA n (l:ls) = agregarSi l (longitud l > n) (lasDeLongitudMayorA n ls)
 
 -- 11
 
@@ -138,7 +155,32 @@ losPrimeros n (x:xs) = x : losPrimeros (n - 1) xs
 -- 5
 
 sinLosPrimeros :: Int -> [a] -> [a]
-sinLosPrimeros 0 l = l
+sinLosPrimeros 0 ps = ps
 sinLosPrimeros _ [] = []
 sinLosPrimeros n (x:xs) = sinLosPrimeros (n - 1) xs
 
+------------------------------------Registros------------------------------------
+
+-- 1
+
+mayoresA :: Int -> [Persona] -> [Persona]
+mayoresA 0 ps = ps
+mayoresA _ [] = []
+mayoresA n (p:ps) = agregarSi p (edad p > n) (mayoresA n ps)
+
+-- 2
+
+sumatoriaEdades :: [Persona] -> Int
+sumatoriaEdades [] = 0
+sumatoriaEdades (p:ps) = edad p + sumatoriaEdades ps
+
+promedioEdad :: [Persona] -> Int
+-- PRECOND: La lista posee al menos una persona
+promedioEdad ps = div (sumatoriaEdades ps) (longitud ps)
+
+-- 3
+
+elMasViejo :: [Persona] -> Persona
+-- PRECOND: La lista posee al menos una persona
+elMasViejo [p] = p
+elMasViejo (p:ps) = laQueEsMayor p (elMasViejo ps)
