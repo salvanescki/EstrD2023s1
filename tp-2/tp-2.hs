@@ -52,17 +52,7 @@ esTipoSuperiorA _ _ = False
 
 superaA :: Pokemon -> Pokemon -> Bool
 superaA p1 p2 = esTipoSuperiorA (tipoDe p1)(tipoDe p2)
-{-
 
-cantidadDePokemonDe :: TipoDePokemon -> Entrenador -> Int
-cantidadDePokemonDe tipo (E n p1 p2) = unoSiCeroSino(esMismoTipoQue (tipoDe p1) tipo) + unoSiCeroSino(esMismoTipoQue (tipoDe p2) tipo)
-
-listaPokemonDeEntrenador :: Entrenador -> [Pokemon]
-listaPokemonDeEntrenador (E n p1 p2) = [p1, p2]
-
-juntarPokemon :: (Entrenador, Entrenador) -> [Pokemon]
-juntarPokemon (e1,e2) = listaPokemonDeEntrenador e1 ++ listaPokemonDeEntrenador e2
--}
 ------------------------------------Funciones auxiliares--------------------------------------
 
 agregarSi :: a -> Bool -> [a] -> [a]
@@ -256,3 +246,50 @@ esMaestroPokemon :: Entrenador -> Bool
 esMaestroPokemon e = tieneAlMenosUnPokemonDelTipo Fuego e && tieneAlMenosUnPokemonDelTipo Agua e && tieneAlMenosUnPokemonDelTipo Planta e
 
 -- 3
+
+data Seniority = Junior | SemiSenior | Senior
+        deriving Show
+data Proyecto = ConsProyecto String
+        deriving Show
+data Rol = Developer Seniority Proyecto | Management Seniority Proyecto
+        deriving Show
+data Empresa = ConsEmpresa [Rol]
+        deriving Show
+
+--
+
+proyectoDeRol :: Rol -> Proyecto
+proyectoDeRol (Developer s p) = p
+proyectoDeRol (Management s p) = p
+
+nombreDeProyecto :: Proyecto -> String
+nombreDeProyecto (ConsProyecto s) = s
+
+proyectoPerteneceA :: Proyecto -> [Proyecto] -> Bool
+proyectoPerteneceA _ [] = False
+proyectoPerteneceA (ConsProyecto s) (pj:pjs) = s == nombreDeProyecto pj || proyectoPerteneceA (ConsProyecto s) pjs
+
+proyectos :: Empresa -> [Proyecto]
+proyectos (ConsEmpresa []) = []
+proyectos (ConsEmpresa (r:rls)) = agregarSi (proyectoDeRol r) (not (proyectoPerteneceA (proyectoDeRol r) (proyectos (ConsEmpresa rls)))) (proyectos (ConsEmpresa rls))
+
+--
+
+seniorityEsIgual :: Seniority -> Seniority -> Bool
+seniorityEsIgual Junior Junior = True
+seniorityEsIgual SemiSenior SemiSenior = True
+seniorityEsIgual Senior Senior = True
+seniorityEsIgual _ _ = False
+
+esDevSenior :: Rol -> Bool
+esDevSenior (Developer s p) = seniorityEsIgual s Senior
+esDevSenior _ = False
+
+devEstaEnAlgunProyecto :: Rol -> [Proyecto] -> Bool
+devEstaEnAlgunProyecto dev pjs = proyectoPerteneceA (proyectoDeRol dev) pjs
+
+losDevSenior :: Empresa -> [Proyecto] -> Int
+losDevSenior _ [] = 0
+losDevSenior (ConsEmpresa []) _ = 0
+losDevSenior (ConsEmpresa (r:rls)) pjs = unoSiCeroSino(esDevSenior r && devEstaEnAlgunProyecto r pjs) + losDevSenior (ConsEmpresa rls) pjs
+
