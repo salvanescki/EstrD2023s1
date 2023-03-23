@@ -285,11 +285,35 @@ esDevSenior :: Rol -> Bool
 esDevSenior (Developer s p) = seniorityEsIgual s Senior
 esDevSenior _ = False
 
-devEstaEnAlgunProyecto :: Rol -> [Proyecto] -> Bool
-devEstaEnAlgunProyecto dev pjs = proyectoPerteneceA (proyectoDeRol dev) pjs
+estaEnAlgunProyecto :: Rol -> [Proyecto] -> Bool
+estaEnAlgunProyecto dev pjs = proyectoPerteneceA (proyectoDeRol dev) pjs
 
 losDevSenior :: Empresa -> [Proyecto] -> Int
 losDevSenior _ [] = 0
 losDevSenior (ConsEmpresa []) _ = 0
-losDevSenior (ConsEmpresa (r:rls)) pjs = unoSiCeroSino(esDevSenior r && devEstaEnAlgunProyecto r pjs) + losDevSenior (ConsEmpresa rls) pjs
+losDevSenior (ConsEmpresa (r:rls)) pjs = unoSiCeroSino(esDevSenior r && estaEnAlgunProyecto r pjs) + losDevSenior (ConsEmpresa rls) pjs
 
+--
+
+cantQueTrabajanEn :: [Proyecto] -> Empresa -> Int
+cantQueTrabajanEn [] _ = 0
+cantQueTrabajanEn _ (ConsEmpresa []) = 0
+cantQueTrabajanEn pjs (ConsEmpresa (r:rls)) = unoSiCeroSino(estaEnAlgunProyecto r pjs) + cantQueTrabajanEn pjs (ConsEmpresa rls)
+
+--
+
+nombresPorProyecto :: [Proyecto] -> [String]
+nombresPorProyecto [] = []
+nombresPorProyecto (pj:pjs) = nombreDeProyecto pj : nombresPorProyecto pjs
+
+proyectosPorCadaRol :: Empresa -> [Proyecto]
+proyectosPorCadaRol (ConsEmpresa []) = []
+proyectosPorCadaRol (ConsEmpresa (r:rls)) = proyectoDeRol r : proyectosPorCadaRol (ConsEmpresa rls)
+
+aparicionesDeProyectoCadaProyecto :: [Proyecto] -> [Proyecto] -> [(Proyecto, Int)]
+aparicionesDeProyectoCadaProyecto [] _= []
+aparicionesDeProyectoCadaProyecto _ [] = []
+aparicionesDeProyectoCadaProyecto (pj:pjs) lp = (pj, apariciones (nombreDeProyecto pj) (nombresPorProyecto lp) ) : aparicionesDeProyectoCadaProyecto pjs lp
+
+asignadosPorProyecto :: Empresa -> [(Proyecto, Int)]
+asignadosPorProyecto e = aparicionesDeProyectoCadaProyecto (proyectos e) (proyectosPorCadaRol e)
