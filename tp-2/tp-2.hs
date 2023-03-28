@@ -216,6 +216,8 @@ elMasViejo (p:ps) = laQueEsMayor p (elMasViejo ps)
 cantPokemon :: Entrenador -> Int
 cantPokemon (ConsEntrenador _ pks) = longitud pks
 
+--
+
 pokemonsDe :: Entrenador -> [Pokemon]
 pokemonsDe (ConsEntrenador n pks) = pks
 
@@ -228,24 +230,19 @@ cantPokemonDe t e = cantPokemonDeTipoEnLista t (pokemonsDe e)
 
 --
 
-tipoDePokemonLeGanaATodosLosDe :: TipoDePokemon -> Entrenador -> Bool
-tipoDePokemonLeGanaATodosLosDe t (ConsEntrenador n []) = True
-tipoDePokemonLeGanaATodosLosDe t (ConsEntrenador n (p:pks)) = esTipoSuperiorA t (tipoDe p) && tipoDePokemonLeGanaATodosLosDe t (ConsEntrenador n pks)
-
-cantidadDePokemonDeTipo :: TipoDePokemon -> Entrenador -> Int
-cantidadDePokemonDeTipo t (ConsEntrenador _ []) = 0
-cantidadDePokemonDeTipo t (ConsEntrenador n (p:pks)) = unoSiCeroSino(esMismoTipoQue (tipoDe p) t) + cantidadDePokemonDeTipo t (ConsEntrenador n pks)
+tipoDePokemonLeGanaATodosLosDeLista :: TipoDePokemon -> [Pokemon] -> Bool
+tipoDePokemonLeGanaATodosLosDeLista t [] = True
+tipoDePokemonLeGanaATodosLosDeLista t (p:pks) = esTipoSuperiorA t (tipoDe p) && tipoDePokemonLeGanaATodosLosDeLista t pks
 
 cuantosDeTipo_De_LeGananATodosLosDe_ :: TipoDePokemon -> Entrenador -> Entrenador -> Int
-cuantosDeTipo_De_LeGananATodosLosDe_ t e1 e2 = if tipoDePokemonLeGanaATodosLosDe t e2
-                                                then cantidadDePokemonDeTipo t e1
+cuantosDeTipo_De_LeGananATodosLosDe_ t e1 e2 = if tipoDePokemonLeGanaATodosLosDeLista t (pokemonsDe e2)
+                                                then cantPokemonDe t e1
                                                 else 0
 
 --
 
 tieneAlMenosUnPokemonDelTipo :: TipoDePokemon -> Entrenador -> Bool
-tieneAlMenosUnPokemonDelTipo tipo (ConsEntrenador n []) = False
-tieneAlMenosUnPokemonDelTipo tipo (ConsEntrenador n (p:pks)) = esMismoTipoQue tipo (tipoDe p) || tieneAlMenosUnPokemonDelTipo tipo (ConsEntrenador n pks)
+tieneAlMenosUnPokemonDelTipo t e = cantPokemonDe t e > 0
 
 esMaestroPokemon :: Entrenador -> Bool
 esMaestroPokemon e = tieneAlMenosUnPokemonDelTipo Fuego e && tieneAlMenosUnPokemonDelTipo Agua e && tieneAlMenosUnPokemonDelTipo Planta e
