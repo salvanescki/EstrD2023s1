@@ -317,10 +317,13 @@ losDevSenior e pjs = cantDevSeniorTrabajandoEnProyectosEnListaRoles (rolesEnEmpr
 
 --
 
+cantEmpleadosTrabajandoEnProyectosEnListaRoles :: [Rol] -> [Proyecto] -> Int
+cantEmpleadosTrabajandoEnProyectosEnListaRoles [] _ = 0
+cantEmpleadosTrabajandoEnProyectosEnListaRoles _ [] = 0
+cantEmpleadosTrabajandoEnProyectosEnListaRoles (r:rls) pjs = unoSiCeroSino(estaEnAlgunProyecto r pjs) + cantEmpleadosTrabajandoEnProyectosEnListaRoles rls pjs
+
 cantQueTrabajanEn :: [Proyecto] -> Empresa -> Int
-cantQueTrabajanEn [] _ = 0
-cantQueTrabajanEn _ (ConsEmpresa []) = 0
-cantQueTrabajanEn pjs (ConsEmpresa (r:rls)) = unoSiCeroSino(estaEnAlgunProyecto r pjs) + cantQueTrabajanEn pjs (ConsEmpresa rls)
+cantQueTrabajanEn pjs e = cantEmpleadosTrabajandoEnProyectosEnListaRoles (rolesEnEmpresa e) pjs
 
 --
 
