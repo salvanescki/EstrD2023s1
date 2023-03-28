@@ -327,27 +327,23 @@ cantQueTrabajanEn pjs e = cantEmpleadosTrabajandoEnProyectosEnListaRoles (rolesE
 
 --
 
-nombresPorProyecto :: [Proyecto] -> [String]
-nombresPorProyecto [] = []
-nombresPorProyecto (pj:pjs) = nombreDeProyecto pj : nombresPorProyecto pjs
+parRepetido :: (Proyecto, Int) -> (Proyecto, Int) -> Bool
+parRepetido (p1,n1) (p2,n2) = proyectoEsIgualA p1 p2
 
-proyectosPorCadaRol :: Empresa -> [Proyecto]
-proyectosPorCadaRol (ConsEmpresa []) = []
-proyectosPorCadaRol (ConsEmpresa (r:rls)) = proyectoDeRol r : proyectosPorCadaRol (ConsEmpresa rls)
+parPerteneceALista :: (Proyecto, Int) -> [(Proyecto, Int)] -> Bool
+parPerteneceALista _ [] = False
+parPerteneceALista pi (pn:pns) = parRepetido pi pn || parPerteneceALista pi pns
 
-aparicionesDeProyectoCadaProyecto :: [Proyecto] -> [Proyecto] -> [(Proyecto, Int)]
-aparicionesDeProyectoCadaProyecto [] _= []
-aparicionesDeProyectoCadaProyecto _ [] = []
-aparicionesDeProyectoCadaProyecto (pj:pjs) lp = (pj, apariciones (nombreDeProyecto pj) (nombresPorProyecto lp) ) : aparicionesDeProyectoCadaProyecto pjs lp
+listaParesProyectoCantidadSinRepetir :: [(Proyecto, Int)] -> [(Proyecto, Int)]
+listaParesProyectoCantidadSinRepetir [] = []
+listaParesProyectoCantidadSinRepetir (pn : pns) = if parPerteneceALista pn pns
+                                                        then listaParesProyectoCantidadSinRepetir pns
+                                                        else pn : listaParesProyectoCantidadSinRepetir pns
+
+cantEmpleadosAsignadosPorProyecto :: [Proyecto] -> [Rol] -> [(Proyecto, Int)]
+cantEmpleadosAsignadosPorProyecto [] _ = []
+cantEmpleadosAsignadosPorProyecto _ [] = []
+cantEmpleadosAsignadosPorProyecto (pj:pjs) rls = (pj, cantEmpleadosTrabajandoEnProyectosEnListaRoles rls [pj]) : cantEmpleadosAsignadosPorProyecto pjs rls
 
 asignadosPorProyecto :: Empresa -> [(Proyecto, Int)]
-asignadosPorProyecto e = aparicionesDeProyectoCadaProyecto (proyectos e) (proyectosPorCadaRol e)
-
-microsoft = ConsEmpresa  [nadella, gates, jack, bob, millers]
-nadella   = Management   Senior     w11
-gates     = Management   Senior     azure
-jack      = Developer    SemiSenior azure
-bob       = Developer    Senior     azure
-millers   = Developer    Senior     w11
-w11       = ConsProyecto "Windows 11"
-azure     = ConsProyecto "Azure"
+asignadosPorProyecto e = listaParesProyectoCantidadSinRepetir (cantEmpleadosAsignadosPorProyecto (proyectosEnListaDeRoles (rolesEnEmpresa e)) (rolesEnEmpresa e))
