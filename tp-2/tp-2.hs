@@ -94,7 +94,7 @@ disyuncion (p:ps) = p || disyuncion ps
 
 aplanar :: [[a]] -> [a]
 aplanar [] = []
-aplanar (l:ls) = l ++ aplanar ls
+aplanar (xs:xss) = xs ++ aplanar xss
 
 -- 7
 
@@ -118,7 +118,7 @@ losMenoresA k (n:ns) = agregarSi n (n < k) (losMenoresA k ns)
 
 lasDeLongitudMayorA :: Int -> [[a]] -> [[a]]
 lasDeLongitudMayorA _ [] = []
-lasDeLongitudMayorA n (l:ls) = agregarSi l (longitud l > n) (lasDeLongitudMayorA n ls)
+lasDeLongitudMayorA n (xs:xss) = agregarSi xs (longitud xs > n) (lasDeLongitudMayorA n xss)
 
 -- 11
 
