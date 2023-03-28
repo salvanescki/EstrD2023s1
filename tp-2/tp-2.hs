@@ -56,8 +56,8 @@ superaA p1 p2 = esTipoSuperiorA (tipoDe p1)(tipoDe p2)
 ------------------------------------Funciones auxiliares--------------------------------------
 
 agregarSi :: a -> Bool -> [a] -> [a]
-agregarSi e True l = e : l
-agregarSi _ _ l = l
+agregarSi e True xs = e : xs
+agregarSi _ _ xs = xs
 
 ------------------------------------Recursión sobre Listas------------------------------------
 -- 1
