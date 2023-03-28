@@ -260,6 +260,9 @@ data Empresa = ConsEmpresa [Rol]
 
 --
 
+rolesEnEmpresa :: Empresa -> [Rol]
+rolesEnEmpresa (ConsEmpresa rls) = rls
+
 proyectoDeRol :: Rol -> Proyecto
 proyectoDeRol (Developer s p) = p
 proyectoDeRol (Management s p) = p
@@ -267,14 +270,25 @@ proyectoDeRol (Management s p) = p
 nombreDeProyecto :: Proyecto -> String
 nombreDeProyecto (ConsProyecto s) = s
 
-proyectoPerteneceA :: Proyecto -> [Proyecto] -> Bool
-proyectoPerteneceA _ [] = False
-proyectoPerteneceA (ConsProyecto s) (pj:pjs) = s == nombreDeProyecto pj || proyectoPerteneceA (ConsProyecto s) pjs
+proyectoEsIgualA :: Proyecto -> Proyecto -> Bool
+proyectoEsIgualA p1 p2 = nombreDeProyecto p1 == nombreDeProyecto p2
+
+proyectoPerteneceALista :: Proyecto -> [Proyecto] -> Bool
+proyectoPerteneceALista _ [] = False
+proyectoPerteneceALista p (pj:pjs) = proyectoEsIgualA p pj || proyectoPerteneceALista p pjs
+
+proyectosEnListaDeRoles :: [Rol] -> [Proyecto]
+proyectosEnListaDeRoles [] = []
+proyectosEnListaDeRoles (r:rls) = proyectoDeRol r : proyectosEnListaDeRoles rls
+
+listaProyectosSinRepetir :: [Proyecto] -> [Proyecto]
+listaProyectosSinRepetir [] = []
+listaProyectosSinRepetir (pj:pjs) = if proyectoPerteneceALista pj pjs
+                                        then listaProyectosSinRepetir pjs
+                                        else pj : listaProyectosSinRepetir pjs
 
 proyectos :: Empresa -> [Proyecto]
-proyectos (ConsEmpresa []) = []
-proyectos (ConsEmpresa (r:rls)) = agregarSi (proyectoDeRol r) (not (proyectoPerteneceA (proyectoDeRol r) (proyectos (ConsEmpresa rls)))) (proyectos (ConsEmpresa rls))
-
+proyectos e = listaProyectosSinRepetir(proyectosEnListaDeRoles (rolesEnEmpresa e))
 --
 
 seniorityEsIgual :: Seniority -> Seniority -> Bool
@@ -288,7 +302,7 @@ esDevSenior (Developer s p) = seniorityEsIgual s Senior
 esDevSenior _ = False
 
 estaEnAlgunProyecto :: Rol -> [Proyecto] -> Bool
-estaEnAlgunProyecto dev pjs = proyectoPerteneceA (proyectoDeRol dev) pjs
+estaEnAlgunProyecto dev pjs = proyectoPerteneceALista (proyectoDeRol dev) pjs
 
 losDevSenior :: Empresa -> [Proyecto] -> Int
 losDevSenior _ [] = 0
@@ -319,3 +333,12 @@ aparicionesDeProyectoCadaProyecto (pj:pjs) lp = (pj, apariciones (nombreDeProyec
 
 asignadosPorProyecto :: Empresa -> [(Proyecto, Int)]
 asignadosPorProyecto e = aparicionesDeProyectoCadaProyecto (proyectos e) (proyectosPorCadaRol e)
+
+microsoft = ConsEmpresa  [nadella, gates, jack, bob, millers]
+nadella   = Management   Senior     w11
+gates     = Management   Senior     azure
+jack      = Developer    SemiSenior azure
+bob       = Developer    Senior     azure
+millers   = Developer    Senior     w11
+w11       = ConsProyecto "Windows 11"
+azure     = ConsProyecto "Azure"
