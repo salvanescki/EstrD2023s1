@@ -291,23 +291,29 @@ proyectos :: Empresa -> [Proyecto]
 proyectos e = listaProyectosSinRepetir(proyectosEnListaDeRoles (rolesEnEmpresa e))
 --
 
-seniorityEsIgual :: Seniority -> Seniority -> Bool
-seniorityEsIgual Junior Junior = True
-seniorityEsIgual SemiSenior SemiSenior = True
-seniorityEsIgual Senior Senior = True
-seniorityEsIgual _ _ = False
+seniorityEsIgualA :: Seniority -> Seniority -> Bool
+seniorityEsIgualA Junior Junior = True
+seniorityEsIgualA SemiSenior SemiSenior = True
+seniorityEsIgualA Senior Senior = True
+seniorityEsIgualA _ _ = False
 
 esDevSenior :: Rol -> Bool
-esDevSenior (Developer s p) = seniorityEsIgual s Senior
+esDevSenior (Developer s p) = seniorityEsIgualA s Senior
 esDevSenior _ = False
 
 estaEnAlgunProyecto :: Rol -> [Proyecto] -> Bool
 estaEnAlgunProyecto dev pjs = proyectoPerteneceALista (proyectoDeRol dev) pjs
 
+esDevSeniorEnAlgunProyecto :: Rol -> [Proyecto] -> Bool
+esDevSeniorEnAlgunProyecto r pjs = esDevSenior r && estaEnAlgunProyecto r pjs
+
+cantDevSeniorTrabajandoEnProyectosEnListaRoles :: [Rol] -> [Proyecto] -> Int
+cantDevSeniorTrabajandoEnProyectosEnListaRoles [] _ = 0
+cantDevSeniorTrabajandoEnProyectosEnListaRoles _ [] = 0
+cantDevSeniorTrabajandoEnProyectosEnListaRoles (r:rls) pjs = unoSiCeroSino(esDevSeniorEnAlgunProyecto r pjs) + cantDevSeniorTrabajandoEnProyectosEnListaRoles rls pjs
+
 losDevSenior :: Empresa -> [Proyecto] -> Int
-losDevSenior _ [] = 0
-losDevSenior (ConsEmpresa []) _ = 0
-losDevSenior (ConsEmpresa (r:rls)) pjs = unoSiCeroSino(esDevSenior r && estaEnAlgunProyecto r pjs) + losDevSenior (ConsEmpresa rls) pjs
+losDevSenior e pjs = cantDevSeniorTrabajandoEnProyectosEnListaRoles (rolesEnEmpresa e) pjs
 
 --
 
