@@ -56,8 +56,8 @@ superaA p1 p2 = esTipoSuperiorA (tipoDe p1)(tipoDe p2)
 ------------------------------------Funciones auxiliares--------------------------------------
 
 agregarSi :: a -> Bool -> [a] -> [a]
-agregarSi e True l = e : l
-agregarSi _ _ l = l
+agregarSi e True xs = e : xs
+agregarSi _ _ xs = xs
 
 ------------------------------------Recursión sobre Listas------------------------------------
 -- 1
@@ -94,7 +94,7 @@ disyuncion (p:ps) = p || disyuncion ps
 
 aplanar :: [[a]] -> [a]
 aplanar [] = []
-aplanar (l:ls) = l ++ aplanar ls
+aplanar (xs:xss) = xs ++ aplanar xss
 
 -- 7
 
@@ -118,7 +118,7 @@ losMenoresA k (n:ns) = agregarSi n (n < k) (losMenoresA k ns)
 
 lasDeLongitudMayorA :: Int -> [[a]] -> [[a]]
 lasDeLongitudMayorA _ [] = []
-lasDeLongitudMayorA n (l:ls) = agregarSi l (longitud l > n) (lasDeLongitudMayorA n ls)
+lasDeLongitudMayorA n (xs:xss) = agregarSi xs (longitud xs > n) (lasDeLongitudMayorA n xss)
 
 -- 11
 
@@ -152,9 +152,7 @@ zipMaximos (x:xs) (y:ys) = if x > y
 elMinimo :: Ord a => [a] -> a
 -- PRECOND: La lista no está vacía
 elMinimo [x] = x
-elMinimo (x:xs) = if x < elMinimo xs
-                    then x
-                    else elMinimo xs
+elMinimo (x:xs) = min x (elMinimo xs)
 
 ------------------------------------Recursión sobre Números------------------------------------
 
@@ -167,8 +165,9 @@ factorial n = n * factorial (n - 1)
 -- 2
 
 cuentaRegresiva :: Int -> [Int]
-cuentaRegresiva 0 = []
-cuentaRegresiva n = n : cuentaRegresiva (n - 1)
+cuentaRegresiva n = if n < 1 
+                        then [] 
+                        else n : cuentaRegresiva (n - 1)
 
 -- 3
 
@@ -217,30 +216,33 @@ elMasViejo (p:ps) = laQueEsMayor p (elMasViejo ps)
 cantPokemon :: Entrenador -> Int
 cantPokemon (ConsEntrenador _ pks) = longitud pks
 
+--
+
+pokemonsDe :: Entrenador -> [Pokemon]
+pokemonsDe (ConsEntrenador n pks) = pks
+
+cantPokemonDeTipoEnLista :: TipoDePokemon -> [Pokemon] -> Int
+cantPokemonDeTipoEnLista t [] = 0
+cantPokemonDeTipoEnLista t (p:pks) = unoSiCeroSino (esMismoTipoQue t (tipoDe p)) + cantPokemonDeTipoEnLista t pks
+
 cantPokemonDe :: TipoDePokemon -> Entrenador -> Int
-cantPokemonDe tipo (ConsEntrenador n []) = 0
-cantPokemonDe tipo (ConsEntrenador n (p:pks)) = unoSiCeroSino (esMismoTipoQue tipo (tipoDe p)) + cantPokemonDe tipo (ConsEntrenador n pks)
+cantPokemonDe t e = cantPokemonDeTipoEnLista t (pokemonsDe e)
 
 --
 
-tipoDePokemonLeGanaATodosLosDe :: TipoDePokemon -> Entrenador -> Bool
-tipoDePokemonLeGanaATodosLosDe t (ConsEntrenador n []) = True
-tipoDePokemonLeGanaATodosLosDe t (ConsEntrenador n (p:pks)) = esTipoSuperiorA t (tipoDe p) && tipoDePokemonLeGanaATodosLosDe t (ConsEntrenador n pks)
-
-cantidadDePokemonDeTipo :: TipoDePokemon -> Entrenador -> Int
-cantidadDePokemonDeTipo t (ConsEntrenador _ []) = 0
-cantidadDePokemonDeTipo t (ConsEntrenador n (p:pks)) = unoSiCeroSino(esMismoTipoQue (tipoDe p) t) + cantidadDePokemonDeTipo t (ConsEntrenador n pks)
+tipoDePokemonLeGanaATodosLosDeLista :: TipoDePokemon -> [Pokemon] -> Bool
+tipoDePokemonLeGanaATodosLosDeLista t [] = True
+tipoDePokemonLeGanaATodosLosDeLista t (p:pks) = esTipoSuperiorA t (tipoDe p) && tipoDePokemonLeGanaATodosLosDeLista t pks
 
 cuantosDeTipo_De_LeGananATodosLosDe_ :: TipoDePokemon -> Entrenador -> Entrenador -> Int
-cuantosDeTipo_De_LeGananATodosLosDe_ t e1 e2 = if tipoDePokemonLeGanaATodosLosDe t e2
-                                                then cantidadDePokemonDeTipo t e1
+cuantosDeTipo_De_LeGananATodosLosDe_ t e1 e2 = if tipoDePokemonLeGanaATodosLosDeLista t (pokemonsDe e2)
+                                                then cantPokemonDe t e1
                                                 else 0
 
 --
 
 tieneAlMenosUnPokemonDelTipo :: TipoDePokemon -> Entrenador -> Bool
-tieneAlMenosUnPokemonDelTipo tipo (ConsEntrenador n []) = False
-tieneAlMenosUnPokemonDelTipo tipo (ConsEntrenador n (p:pks)) = esMismoTipoQue tipo (tipoDe p) || tieneAlMenosUnPokemonDelTipo tipo (ConsEntrenador n pks)
+tieneAlMenosUnPokemonDelTipo t e = cantPokemonDe t e > 0
 
 esMaestroPokemon :: Entrenador -> Bool
 esMaestroPokemon e = tieneAlMenosUnPokemonDelTipo Fuego e && tieneAlMenosUnPokemonDelTipo Agua e && tieneAlMenosUnPokemonDelTipo Planta e
@@ -258,6 +260,9 @@ data Empresa = ConsEmpresa [Rol]
 
 --
 
+rolesEnEmpresa :: Empresa -> [Rol]
+rolesEnEmpresa (ConsEmpresa rls) = rls
+
 proyectoDeRol :: Rol -> Proyecto
 proyectoDeRol (Developer s p) = p
 proyectoDeRol (Management s p) = p
@@ -265,55 +270,80 @@ proyectoDeRol (Management s p) = p
 nombreDeProyecto :: Proyecto -> String
 nombreDeProyecto (ConsProyecto s) = s
 
-proyectoPerteneceA :: Proyecto -> [Proyecto] -> Bool
-proyectoPerteneceA _ [] = False
-proyectoPerteneceA (ConsProyecto s) (pj:pjs) = s == nombreDeProyecto pj || proyectoPerteneceA (ConsProyecto s) pjs
+proyectoEsIgualA :: Proyecto -> Proyecto -> Bool
+proyectoEsIgualA p1 p2 = nombreDeProyecto p1 == nombreDeProyecto p2
+
+proyectoPerteneceALista :: Proyecto -> [Proyecto] -> Bool
+proyectoPerteneceALista _ [] = False
+proyectoPerteneceALista p (pj:pjs) = proyectoEsIgualA p pj || proyectoPerteneceALista p pjs
+
+proyectosEnListaDeRoles :: [Rol] -> [Proyecto]
+proyectosEnListaDeRoles [] = []
+proyectosEnListaDeRoles (r:rls) = proyectoDeRol r : proyectosEnListaDeRoles rls
+
+listaProyectosSinRepetir :: [Proyecto] -> [Proyecto]
+listaProyectosSinRepetir [] = []
+listaProyectosSinRepetir (pj:pjs) = if proyectoPerteneceALista pj pjs
+                                        then listaProyectosSinRepetir pjs
+                                        else pj : listaProyectosSinRepetir pjs
 
 proyectos :: Empresa -> [Proyecto]
-proyectos (ConsEmpresa []) = []
-proyectos (ConsEmpresa (r:rls)) = agregarSi (proyectoDeRol r) (not (proyectoPerteneceA (proyectoDeRol r) (proyectos (ConsEmpresa rls)))) (proyectos (ConsEmpresa rls))
-
+proyectos e = listaProyectosSinRepetir(proyectosEnListaDeRoles (rolesEnEmpresa e))
 --
 
-seniorityEsIgual :: Seniority -> Seniority -> Bool
-seniorityEsIgual Junior Junior = True
-seniorityEsIgual SemiSenior SemiSenior = True
-seniorityEsIgual Senior Senior = True
-seniorityEsIgual _ _ = False
+seniorityEsIgualA :: Seniority -> Seniority -> Bool
+seniorityEsIgualA Junior Junior = True
+seniorityEsIgualA SemiSenior SemiSenior = True
+seniorityEsIgualA Senior Senior = True
+seniorityEsIgualA _ _ = False
 
 esDevSenior :: Rol -> Bool
-esDevSenior (Developer s p) = seniorityEsIgual s Senior
+esDevSenior (Developer s p) = seniorityEsIgualA s Senior
 esDevSenior _ = False
 
 estaEnAlgunProyecto :: Rol -> [Proyecto] -> Bool
-estaEnAlgunProyecto dev pjs = proyectoPerteneceA (proyectoDeRol dev) pjs
+estaEnAlgunProyecto dev pjs = proyectoPerteneceALista (proyectoDeRol dev) pjs
+
+esDevSeniorEnAlgunProyecto :: Rol -> [Proyecto] -> Bool
+esDevSeniorEnAlgunProyecto r pjs = esDevSenior r && estaEnAlgunProyecto r pjs
+
+cantDevSeniorTrabajandoEnProyectosEnListaRoles :: [Rol] -> [Proyecto] -> Int
+cantDevSeniorTrabajandoEnProyectosEnListaRoles [] _ = 0
+cantDevSeniorTrabajandoEnProyectosEnListaRoles _ [] = 0
+cantDevSeniorTrabajandoEnProyectosEnListaRoles (r:rls) pjs = unoSiCeroSino(esDevSeniorEnAlgunProyecto r pjs) + cantDevSeniorTrabajandoEnProyectosEnListaRoles rls pjs
 
 losDevSenior :: Empresa -> [Proyecto] -> Int
-losDevSenior _ [] = 0
-losDevSenior (ConsEmpresa []) _ = 0
-losDevSenior (ConsEmpresa (r:rls)) pjs = unoSiCeroSino(esDevSenior r && estaEnAlgunProyecto r pjs) + losDevSenior (ConsEmpresa rls) pjs
+losDevSenior e pjs = cantDevSeniorTrabajandoEnProyectosEnListaRoles (rolesEnEmpresa e) pjs
 
 --
+
+cantEmpleadosTrabajandoEnProyectosEnListaRoles :: [Rol] -> [Proyecto] -> Int
+cantEmpleadosTrabajandoEnProyectosEnListaRoles [] _ = 0
+cantEmpleadosTrabajandoEnProyectosEnListaRoles _ [] = 0
+cantEmpleadosTrabajandoEnProyectosEnListaRoles (r:rls) pjs = unoSiCeroSino(estaEnAlgunProyecto r pjs) + cantEmpleadosTrabajandoEnProyectosEnListaRoles rls pjs
 
 cantQueTrabajanEn :: [Proyecto] -> Empresa -> Int
-cantQueTrabajanEn [] _ = 0
-cantQueTrabajanEn _ (ConsEmpresa []) = 0
-cantQueTrabajanEn pjs (ConsEmpresa (r:rls)) = unoSiCeroSino(estaEnAlgunProyecto r pjs) + cantQueTrabajanEn pjs (ConsEmpresa rls)
+cantQueTrabajanEn pjs e = cantEmpleadosTrabajandoEnProyectosEnListaRoles (rolesEnEmpresa e) pjs
 
 --
 
-nombresPorProyecto :: [Proyecto] -> [String]
-nombresPorProyecto [] = []
-nombresPorProyecto (pj:pjs) = nombreDeProyecto pj : nombresPorProyecto pjs
+parRepetido :: (Proyecto, Int) -> (Proyecto, Int) -> Bool
+parRepetido (p1,n1) (p2,n2) = proyectoEsIgualA p1 p2
 
-proyectosPorCadaRol :: Empresa -> [Proyecto]
-proyectosPorCadaRol (ConsEmpresa []) = []
-proyectosPorCadaRol (ConsEmpresa (r:rls)) = proyectoDeRol r : proyectosPorCadaRol (ConsEmpresa rls)
+parPerteneceALista :: (Proyecto, Int) -> [(Proyecto, Int)] -> Bool
+parPerteneceALista _ [] = False
+parPerteneceALista pi (pn:pns) = parRepetido pi pn || parPerteneceALista pi pns
 
-aparicionesDeProyectoCadaProyecto :: [Proyecto] -> [Proyecto] -> [(Proyecto, Int)]
-aparicionesDeProyectoCadaProyecto [] _= []
-aparicionesDeProyectoCadaProyecto _ [] = []
-aparicionesDeProyectoCadaProyecto (pj:pjs) lp = (pj, apariciones (nombreDeProyecto pj) (nombresPorProyecto lp) ) : aparicionesDeProyectoCadaProyecto pjs lp
+listaParesProyectoCantidadSinRepetir :: [(Proyecto, Int)] -> [(Proyecto, Int)]
+listaParesProyectoCantidadSinRepetir [] = []
+listaParesProyectoCantidadSinRepetir (pn : pns) = if parPerteneceALista pn pns
+                                                        then listaParesProyectoCantidadSinRepetir pns
+                                                        else pn : listaParesProyectoCantidadSinRepetir pns
+
+cantEmpleadosAsignadosPorProyecto :: [Proyecto] -> [Rol] -> [(Proyecto, Int)]
+cantEmpleadosAsignadosPorProyecto [] _ = []
+cantEmpleadosAsignadosPorProyecto _ [] = []
+cantEmpleadosAsignadosPorProyecto (pj:pjs) rls = (pj, cantEmpleadosTrabajandoEnProyectosEnListaRoles rls [pj]) : cantEmpleadosAsignadosPorProyecto pjs rls
 
 asignadosPorProyecto :: Empresa -> [(Proyecto, Int)]
-asignadosPorProyecto e = aparicionesDeProyectoCadaProyecto (proyectos e) (proyectosPorCadaRol e)
+asignadosPorProyecto e = listaParesProyectoCantidadSinRepetir (cantEmpleadosAsignadosPorProyecto (proyectosEnListaDeRoles (rolesEnEmpresa e)) (rolesEnEmpresa e))
