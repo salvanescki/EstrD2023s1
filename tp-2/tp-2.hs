@@ -152,9 +152,7 @@ zipMaximos (x:xs) (y:ys) = if x > y
 elMinimo :: Ord a => [a] -> a
 -- PRECOND: La lista no está vacía
 elMinimo [x] = x
-elMinimo (x:xs) = if x < elMinimo xs
-                    then x
-                    else elMinimo xs
+elMinimo (x:xs) = min x (elMinimo xs)
 
 ------------------------------------Recursión sobre Números------------------------------------
 
