@@ -216,9 +216,15 @@ elMasViejo (p:ps) = laQueEsMayor p (elMasViejo ps)
 cantPokemon :: Entrenador -> Int
 cantPokemon (ConsEntrenador _ pks) = longitud pks
 
+pokemonsDe :: Entrenador -> [Pokemon]
+pokemonsDe (ConsEntrenador n pks) = pks
+
+cantPokemonDeTipoEnLista :: TipoDePokemon -> [Pokemon] -> Int
+cantPokemonDeTipoEnLista t [] = 0
+cantPokemonDeTipoEnLista t (p:pks) = unoSiCeroSino (esMismoTipoQue t (tipoDe p)) + cantPokemonDeTipoEnLista t pks
+
 cantPokemonDe :: TipoDePokemon -> Entrenador -> Int
-cantPokemonDe tipo (ConsEntrenador n []) = 0
-cantPokemonDe tipo (ConsEntrenador n (p:pks)) = unoSiCeroSino (esMismoTipoQue tipo (tipoDe p)) + cantPokemonDe tipo (ConsEntrenador n pks)
+cantPokemonDe t e = cantPokemonDeTipoEnLista t (pokemonsDe e)
 
 --
 
