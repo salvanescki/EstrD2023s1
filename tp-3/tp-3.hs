@@ -149,3 +149,15 @@ leaves :: Tree a -> [a]
 leaves EmptyT = []
 leaves (NodeT x lt rt) = x : (leaves lt ++ leaves rt)
 
+heightT :: Tree a -> Int
+heightT EmptyT = 0
+heightT (NodeT _ EmptyT EmptyT) = 1
+heightT (NodeT _ lt rt) = 1 + max (heightT lt) (heightT rt)
+
+mirrorT :: Tree a -> Tree a
+mirrorT EmptyT = EmptyT
+mirrorT (NodeT x lt rt) = (NodeT x (mirrorT rt) (mirrorT lt))
+
+toList :: Tree a -> [a]
+toList EmptyT = []
+toList (NodeT x lt rt) = toList lt ++ [x] ++ toList rt
