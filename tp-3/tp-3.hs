@@ -112,4 +112,40 @@ alMenosNTesoros n cm = cantTesorosEnCamino cm >= n
 cantTesorosEntre :: Int -> Int -> Camino -> Int
 -}
 
---
+------------------------------------Tipos arbóreos------------------------------------
+
+data Tree a = EmptyT | NodeT a (Tree a) (Tree a)
+        deriving Show
+
+{-
+(NodeT 10 (NodeT 2 EmptyT EmptyT)(NodeT 3 EmptyT EmptyT))
+
+(NodeT 10 (NodeT 2 (NodeT 4 EmptyT EmptyT) (NodeT 6 EmptyT EmptyT))(NodeT 3 (NodeT 9 EmptyT EmptyT) (NodeT 12 EmptyT EmptyT))
+-}
+
+-- Árboles binarios --
+
+sumarT :: Tree Int -> Int
+sumarT EmptyT = 0
+sumarT (NodeT x lt rt) = x + sumarT lt + sumarT rt
+
+sizeT :: Tree a -> Int
+sizeT EmptyT = 0
+sizeT (NodeT x lt rt) = 1 + sizeT lt + sizeT rt
+
+mapDobleT :: Tree Int -> Tree Int
+mapDobleT EmptyT = EmptyT
+mapDobleT (NodeT x lt rt) = NodeT (2 * x) (mapDobleT lt) (mapDobleT rt)
+
+perteneceT :: Eq a => a -> Tree a -> Bool
+perteneceT _ EmptyT = False
+perteneceT x1 (NodeT x2 lt rt) = x1 == x2 || perteneceT x1 lt || perteneceT x1 rt
+
+aparicionesT :: Eq a => a -> Tree a -> Int
+aparicionesT _ EmptyT = 0
+aparicionesT x1 (NodeT x2 lt rt) = unoSiCeroSino(x1 == x2) + aparicionesT x1 lt + aparicionesT x1 rt
+
+leaves :: Tree a -> [a]
+leaves EmptyT = []
+leaves (NodeT x lt rt) = x : (leaves lt ++ leaves rt)
+
