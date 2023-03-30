@@ -161,3 +161,21 @@ mirrorT (NodeT x lt rt) = (NodeT x (mirrorT rt) (mirrorT lt))
 toList :: Tree a -> [a]
 toList EmptyT = []
 toList (NodeT x lt rt) = toList lt ++ [x] ++ toList rt
+
+levelN :: Int -> Tree a -> [a]
+levelN 0 (NodeT x _ _) = [x]
+levelN n (NodeT x lt rt) = levelN (n-1) lt ++ levelN (n-1) rt
+
+--
+
+concatenarHojasPorNivel :: [[a]] -> [[a]] -> [[a]]
+concatenarHojasPorNivel xss [] = xss
+concatenarHojasPorNivel [] yss = yss
+concatenarHojasPorNivel (xs:xss) (ys:yss) = (xs ++ ys) : concatenarHojasPorNivel xss yss
+
+
+listPerLevel :: Tree a -> [[a]]
+listPerLevel EmptyT = []
+listPerLevel (NodeT x lt rt) = [x] : concatenarHojasPorNivel (listPerLevel lt) (listPerLevel rt)
+
+--
