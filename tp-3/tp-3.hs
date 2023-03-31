@@ -54,14 +54,6 @@ data Objeto = Cacharro | Tesoro
 data Camino = Fin | Cofre [Objeto] Camino | Nada Camino
         deriving Show
 
-camino0 = Fin
-camino1 = Nada (Nada (Nada (Nada (Nada (Nada Fin)))))
-camino2 = Nada (Nada (Cofre [Cacharro, Cacharro, Cacharro] (Nada (Nada (Nada (Nada Fin))))))
-camino3 = Nada (Nada (Cofre [Cacharro, Cacharro, Cacharro, Tesoro, Cacharro] (Nada (Nada (Nada (Nada Fin))))))
-camino4 = Nada (Nada (Cofre [Cacharro, Cacharro, Cacharro, Tesoro, Cacharro, Tesoro, Tesoro] (Nada (Nada (Nada (Nada Fin))))))
-camino5 = Nada (Nada (Cofre [Cacharro, Cacharro, Cacharro, Tesoro, Cacharro, Tesoro, Tesoro] (Nada (Nada (Nada (Nada(Cofre [Tesoro] Fin)))))))
-camino6 = Cofre [Tesoro] Fin
-
 --
 
 esTesoro :: Objeto -> Bool
@@ -116,34 +108,6 @@ cantTesorosEntre :: Int -> Int -> Camino -> Int
 
 data Tree a = EmptyT | NodeT a (Tree a) (Tree a)
         deriving Show
-
-treePrueba :: Tree Int
-treePrueba = (NodeT 10 
-                (NodeT 2 EmptyT EmptyT)
-                (NodeT 3 EmptyT EmptyT))
-
-treePrueba2 :: Tree Int
-treePrueba2 = (NodeT 10 
-                        (NodeT 2 
-                                (NodeT 4 EmptyT EmptyT)
-                                (NodeT 6 EmptyT EmptyT))
-                        (NodeT 3 
-                                (NodeT 9 EmptyT EmptyT)
-                                (NodeT 12 EmptyT EmptyT)))
-
-treePrueba3 :: Tree Int
-treePrueba3 = (NodeT 1 
-                        (NodeT 2 
-                                (NodeT 4 
-                                        (NodeT 8 EmptyT EmptyT) 
-                                        EmptyT
-                                )
-                                (NodeT 5 EmptyT EmptyT)
-                        )
-                        (NodeT 3 
-                                (NodeT 6 EmptyT EmptyT)
-                                (NodeT 7 EmptyT EmptyT)
-                        ))
 
 -- Árboles binarios --
 
@@ -213,9 +177,53 @@ ramaMasLarga EmptyT = []
 ramaMasLarga (NodeT x EmptyT EmptyT) = [x]
 ramaMasLarga (NodeT x lt rt) = x : ramaMasLarga(elArbolMasAltoEntre lt rt)
 
-{--
+--
+
+generarCamino :: a -> [[a]] -> [[a]]
+generarCamino x [] = []
+generarCamino x (xs:xss) = (x:xs) : generarCamino x xss
 
 todosLosCaminos :: Tree a -> [[a]]
-todosLosCaminos
+todosLosCaminos EmptyT = []
+todosLosCaminos (NodeT x EmptyT EmptyT) = [[x]]
+todosLosCaminos (NodeT x lt rt) = generarCamino x (todosLosCaminos lt ++ todosLosCaminos rt)
 
--}
+-- Expresiones Aritméticas --
+
+data ExpA = Valor Int
+        | Sum ExpA ExpA
+        | Prod ExpA ExpA
+        | Neg ExpA
+        deriving Show
+
+--
+
+eval :: ExpA -> Int
+eval (Valor n) = n
+eval (Sum exp1 exp2) = eval exp1 + eval exp2
+eval (Prod exp1 exp2) = eval exp1 * eval exp2
+eval (Neg exp) = (-1) * (eval exp)
+
+--
+
+simplificarSuma :: ExpA -> ExpA -> ExpA
+simplificarSuma (Valor 0) exp = exp
+simplificarSuma exp (Valor 0) = exp
+simplificarSuma exp1 exp2 = Sum exp1 exp2
+
+simplificarProducto :: ExpA -> ExpA -> ExpA
+simplificarProducto (Valor 0) exp = Valor 0
+simplificarProducto (Valor 1) exp = exp
+simplificarProducto exp (Valor 0) = Valor 0
+simplificarProducto exp (Valor 1) = exp
+simplificarProducto exp1 exp2 = Prod exp1 exp2
+
+simplificarNegativo :: ExpA -> ExpA
+simplificarNegativo (Neg exp) = exp
+simplificarNegativo exp = Neg exp
+
+simplificar :: ExpA -> ExpA
+simplificar (Sum exp1 exp2) = simplificarSuma (simplificar exp1) (simplificar exp2)
+simplificar (Prod exp1 exp2) = simplificarProducto (simplificar exp1) (simplificar exp2)
+simplificar (Neg exp) = simplificarNegativo(simplificar exp)
+simplificar exp = exp
