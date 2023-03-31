@@ -117,11 +117,33 @@ cantTesorosEntre :: Int -> Int -> Camino -> Int
 data Tree a = EmptyT | NodeT a (Tree a) (Tree a)
         deriving Show
 
-{-
-(NodeT 10 (NodeT 2 EmptyT EmptyT)(NodeT 3 EmptyT EmptyT))
+treePrueba :: Tree Int
+treePrueba = (NodeT 10 
+                (NodeT 2 EmptyT EmptyT)
+                (NodeT 3 EmptyT EmptyT))
 
-(NodeT 10 (NodeT 2 (NodeT 4 EmptyT EmptyT) (NodeT 6 EmptyT EmptyT))(NodeT 3 (NodeT 9 EmptyT EmptyT) (NodeT 12 EmptyT EmptyT))
--}
+treePrueba2 :: Tree Int
+treePrueba2 = (NodeT 10 
+                        (NodeT 2 
+                                (NodeT 4 EmptyT EmptyT)
+                                (NodeT 6 EmptyT EmptyT))
+                        (NodeT 3 
+                                (NodeT 9 EmptyT EmptyT)
+                                (NodeT 12 EmptyT EmptyT)))
+
+treePrueba3 :: Tree Int
+treePrueba3 = (NodeT 1 
+                        (NodeT 2 
+                                (NodeT 4 
+                                        (NodeT 8 EmptyT EmptyT) 
+                                        EmptyT
+                                )
+                                (NodeT 5 EmptyT EmptyT)
+                        )
+                        (NodeT 3 
+                                (NodeT 6 EmptyT EmptyT)
+                                (NodeT 7 EmptyT EmptyT)
+                        ))
 
 -- Árboles binarios --
 
@@ -147,7 +169,8 @@ aparicionesT x1 (NodeT x2 lt rt) = unoSiCeroSino(x1 == x2) + aparicionesT x1 lt 
 
 leaves :: Tree a -> [a]
 leaves EmptyT = []
-leaves (NodeT x lt rt) = x : (leaves lt ++ leaves rt)
+leaves (NodeT x EmptyT EmptyT) = [x]
+leaves (NodeT x lt rt) = leaves lt ++ leaves rt
 
 heightT :: Tree a -> Int
 heightT EmptyT = 0
@@ -179,3 +202,20 @@ listPerLevel EmptyT = []
 listPerLevel (NodeT x lt rt) = [x] : concatenarHojasPorNivel (listPerLevel lt) (listPerLevel rt)
 
 --
+
+elArbolMasAltoEntre :: Tree a -> Tree a -> Tree a
+elArbolMasAltoEntre EmptyT t = t
+elArbolMasAltoEntre t EmptyT = t
+elArbolMasAltoEntre t1 t2 = if heightT t1 > heightT t2 then t1 else t2
+
+ramaMasLarga :: Tree a -> [a]
+ramaMasLarga EmptyT = []
+ramaMasLarga (NodeT x EmptyT EmptyT) = [x]
+ramaMasLarga (NodeT x lt rt) = x : ramaMasLarga(elArbolMasAltoEntre lt rt)
+
+{--
+
+todosLosCaminos :: Tree a -> [[a]]
+todosLosCaminos
+
+-}
