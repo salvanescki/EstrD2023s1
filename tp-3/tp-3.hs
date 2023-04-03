@@ -100,9 +100,25 @@ cantTesorosEnCamino (Nada cm) = cantTesorosEnCamino cm
 alMenosNTesoros :: Int -> Camino -> Bool
 alMenosNTesoros n cm = cantTesorosEnCamino cm >= n
 
-{-
+--
+
+cantTesorosDesde :: Int -> Camino -> Int
+-- PRECOND: i>=0
+cantTesorosDesde 0 cm = cantTesorosEnCamino cm
+cantTesorosDesde n Fin = 0
+cantTesorosDesde n (Cofre objs cm) = cantTesorosDesde (n-1) cm
+cantTesorosDesde n (Nada cm) = cantTesorosDesde (n-1) cm
+
+subCaminoHasta :: Int -> Camino -> Camino
+-- PRECOND: i>=0
+subCaminoHasta 0 _ = Fin
+subCaminoHasta _ Fin = Fin
+subCaminoHasta n (Nada cm) = Nada (subCaminoHasta (n-1) cm)
+subCaminoHasta n (Cofre objs cm) = Cofre objs (subCaminoHasta (n-1) cm)
+
 cantTesorosEntre :: Int -> Int -> Camino -> Int
--}
+-- PRECOND: i<=j
+cantTesorosEntre i j cm = cantTesorosDesde i (subCaminoHasta (j+1) cm)
 
 ------------------------------------Tipos arbóreos------------------------------------
 
