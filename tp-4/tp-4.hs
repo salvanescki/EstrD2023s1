@@ -56,3 +56,77 @@ duplicarAceitunas (Capa ig p) = (Capa (siEsAceitunaDuplicar ig) (duplicarAceitun
 cantCapasPorPizza :: [Pizza] -> [(Int, Pizza)]
 cantCapasPorPizza [] = []
 cantCapasPorPizza (p:ps) = (cantidadDeCapas p, p) : cantCapasPorPizza ps
+
+------------------------------------Mapa de Tesoros------------------------------------
+
+data Dir = Izq | Der
+data Objeto = Tesoro | Chatarra
+data Cofre = Cofre [Objeto]
+data Mapa = Fin Cofre | Bifurcacion Cofre Mapa Mapa
+
+-- De la práctica anterior
+
+esTesoro :: Objeto -> Bool
+esTesoro Tesoro = True
+esTesoro _ = False
+
+hayTesoroEnLista :: [Objeto] -> Bool
+hayTesoroEnLista [] = False
+hayTesoroEnLista (obj:objs) = esTesoro obj || hayTesoroEnLista objs
+
+--
+
+ejMapa = Bifurcacion (Cofre [Chatarra])
+                    (Bifurcacion (Cofre [Chatarra,Chatarra]) 
+                        (Bifurcacion (Cofre [Chatarra,Chatarra,Chatarra])
+                            (Fin (Cofre [Chatarra, Chatarra, Chatarra, Chatarra]))
+                            (Fin (Cofre [Chatarra, Chatarra, Chatarra, Chatarra]))
+                        )
+                        (Bifurcacion (Cofre [Chatarra,Chatarra,Chatarra])
+                            (Fin (Cofre [Chatarra, Chatarra, Chatarra, Chatarra]))
+                            (Fin (Cofre [Chatarra, Chatarra, Chatarra, Chatarra]))
+                        )
+                    )
+                    (Bifurcacion (Cofre [Chatarra,Chatarra]) 
+                        (Bifurcacion (Cofre [Chatarra,Chatarra,Chatarra])
+                            (Fin (Cofre [Chatarra, Chatarra, Chatarra, Chatarra]))
+                            (Fin (Cofre [Chatarra, Chatarra, Chatarra, Chatarra]))
+                        )
+                        (Bifurcacion (Cofre [Chatarra,Chatarra,Chatarra])
+                            (Fin (Cofre [Chatarra, Chatarra, Chatarra, Chatarra]))
+                            (Fin (Cofre [Chatarra, Chatarra, Chatarra, Chatarra]))
+                        )
+                    )
+
+ejMapa2 = Bifurcacion (Cofre [Chatarra])
+                    (Bifurcacion (Cofre [Chatarra,Chatarra]) 
+                        (Bifurcacion (Cofre [Chatarra,Chatarra,Chatarra])
+                            (Fin (Cofre [Chatarra, Chatarra, Chatarra, Chatarra]))
+                            (Fin (Cofre [Chatarra, Chatarra, Chatarra, Chatarra]))
+                        )
+                        (Bifurcacion (Cofre [Chatarra,Chatarra,Chatarra])
+                            (Fin (Cofre [Chatarra, Chatarra, Chatarra, Chatarra]))
+                            (Fin (Cofre [Chatarra, Chatarra, Chatarra, Chatarra]))
+                        )
+                    )
+                    (Bifurcacion (Cofre [Chatarra,Chatarra]) 
+                        (Bifurcacion (Cofre [Chatarra,Chatarra,Chatarra])
+                            (Fin (Cofre [Chatarra, Chatarra, Tesoro, Chatarra]))
+                            (Fin (Cofre [Chatarra, Chatarra, Chatarra, Chatarra]))
+                        )
+                        (Bifurcacion (Cofre [Chatarra,Chatarra,Chatarra])
+                            (Fin (Cofre [Chatarra, Chatarra, Chatarra, Chatarra]))
+                            (Fin (Cofre [Chatarra, Chatarra, Chatarra, Chatarra]))
+                        )
+                    )
+
+--
+
+hayTesoroEnCofre :: Cofre -> Bool
+hayTesoroEnCofre (Cofre objs) = hayTesoroEnLista objs
+
+hayTesoro :: Mapa -> Bool
+hayTesoro (Fin c) = hayTesoroEnCofre c
+hayTesoro (Bifurcacion c m1 m2) = hayTesoroEnCofre c || hayTesoro m1 || hayTesoro m2
+
+--hayTesoroEn :: [Dir] -> Mapa -> Bool
