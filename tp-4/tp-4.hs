@@ -129,4 +129,33 @@ hayTesoro :: Mapa -> Bool
 hayTesoro (Fin c) = hayTesoroEnCofre c
 hayTesoro (Bifurcacion c m1 m2) = hayTesoroEnCofre c || hayTesoro m1 || hayTesoro m2
 
---hayTesoroEn :: [Dir] -> Mapa -> Bool
+--
+
+esIzq :: Dir -> Bool
+esIzq Izq = True
+esIzq _ = False
+
+hayTesoroEn :: [Dir] -> Mapa -> Bool
+hayTesoroEn [] (Fin c) = hayTesoroEnCofre c
+hayTesoroEn [] (Bifurcacion c _ _) = hayTesoroEnCofre c
+hayTesoroEn ds (Fin _) = error "No existe esa direccion en el mapa"
+hayTesoroEn (d:ds) (Bifurcacion c m1 m2) = if esIzq d
+                                            then hayTesoroEn ds m1
+                                            else hayTesoroEn ds m2
+
+--
+
+singularSi :: a -> Bool -> [a]
+singularSi a True = [a]
+singularSi _ _ = []
+
+consACada :: a -> [[a]] -> [[a]]
+consACada x [] = []
+consACada x (xs:xss) = (x:xs) : consACada x xss
+
+caminoAlTesoro :: Mapa -> [Dir]
+--PRECOND: Existe un único tesoro
+caminoAlTesoro (Fin c) = []
+caminoAlTesoro (Bifurcacion c m1 m2) = singularSi [] (hayTesoroEnCofre c)
+                                       ++ (Izq : caminoAlTesoro m1)
+                                       ++ (Der : caminoAlTesoro m2)
