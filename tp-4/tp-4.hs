@@ -60,9 +60,13 @@ cantCapasPorPizza (p:ps) = (cantidadDeCapas p, p) : cantCapasPorPizza ps
 ------------------------------------Mapa de Tesoros------------------------------------
 
 data Dir = Izq | Der
+    deriving Show
 data Objeto = Tesoro | Chatarra
+    deriving Show
 data Cofre = Cofre [Objeto]
+    deriving Show
 data Mapa = Fin Cofre | Bifurcacion Cofre Mapa Mapa
+    deriving Show
 
 -- De la práctica anterior
 
@@ -73,6 +77,21 @@ esTesoro _ = False
 hayTesoroEnLista :: [Objeto] -> Bool
 hayTesoroEnLista [] = False
 hayTesoroEnLista (obj:objs) = esTesoro obj || hayTesoroEnLista objs
+
+agruparPorNivel :: [[a]] -> [[a]] -> [[a]]
+agruparPorNivel xss [] = xss
+agruparPorNivel [] yss = yss
+agruparPorNivel (xs:xss) (ys:yss) = (xs ++ ys) : agruparPorNivel xss yss
+
+consACada :: a -> [[a]] -> [[a]]
+consACada x []       = []
+consACada x (xs:xss) = (x:xs) : consACada x xss
+
+-- heightT adaptado a Mapa
+longCamino :: Mapa -> Int
+longCamino (Fin _) = 0
+longCamino (Bifurcacion _ (Fin _) (Fin _)) = 1
+longCamino (Bifurcacion _ c1 c2) = 1 + max (longCamino c1) (longCamino c2)
 
 --
 
@@ -120,6 +139,30 @@ ejMapa2 = Bifurcacion (Cofre [Chatarra])
                         )
                     )
 
+ejMapa3 = Bifurcacion (Cofre [Tesoro])                                                                                
+                    (Bifurcacion (Cofre [Tesoro,Chatarra]) 
+                        (Bifurcacion (Cofre [Chatarra,Chatarra,Chatarra])
+                            (Bifurcacion (Cofre [Chatarra, Chatarra, Chatarra, Chatarra])
+                                (Fin (Cofre []))
+                                (Fin (Cofre [])))
+                            (Fin (Cofre [Chatarra, Chatarra, Chatarra, Chatarra]))
+                        )
+                        (Bifurcacion (Cofre [Chatarra,Chatarra,Chatarra])
+                            (Fin (Cofre [Chatarra, Chatarra, Chatarra, Chatarra]))
+                            (Fin (Cofre [Chatarra, Chatarra, Chatarra, Chatarra]))
+                        )
+                    )
+                    (Bifurcacion (Cofre [Tesoro,Chatarra]) 
+                        (Bifurcacion (Cofre [Chatarra,Chatarra,Chatarra])
+                            (Fin (Cofre [Chatarra, Chatarra, Tesoro, Chatarra]))
+                            (Fin (Cofre [Chatarra, Chatarra, Chatarra, Chatarra]))
+                        )
+                        (Bifurcacion (Cofre [Chatarra,Chatarra,Chatarra])
+                            (Fin (Cofre [Chatarra, Chatarra, Tesoro, Chatarra]))
+                            (Fin (Cofre [Chatarra, Chatarra, Chatarra, Chatarra]))
+                        )
+                    )
+
 --
 
 hayTesoroEnCofre :: Cofre -> Bool
@@ -145,17 +188,44 @@ hayTesoroEn (d:ds) (Bifurcacion c m1 m2) = if esIzq d
 
 --
 
-singularSi :: a -> Bool -> [a]
-singularSi a True = [a]
-singularSi _ _ = []
-
-consACada :: a -> [[a]] -> [[a]]
-consACada x [] = []
-consACada x (xs:xss) = (x:xs) : consACada x xss
+{-Tengo que arreglarlo, solo devuelve los casos donde el tesoro se encuentra en una Bifurcación, pero no los casos en donde está en un Fin-}
 
 caminoAlTesoro :: Mapa -> [Dir]
 --PRECOND: Existe un único tesoro
 caminoAlTesoro (Fin c) = []
-caminoAlTesoro (Bifurcacion c m1 m2) = singularSi [] (hayTesoroEnCofre c)
-                                       ++ (Izq : caminoAlTesoro m1)
-                                       ++ (Der : caminoAlTesoro m2)
+caminoAlTesoro (Bifurcacion c m1 m2) = if hayTesoroEnCofre c
+                                        then [] ++ (Izq : caminoAlTesoro m1) ++ (Der : caminoAlTesoro m2)
+                                        else caminoAlTesoro m1 ++ caminoAlTesoro m2
+
+--
+
+esMasAltoQue :: Mapa -> Mapa -> Bool
+esMasAltoQue t1 t2 = longCamino t1 > longCamino t2
+
+caminoDeLaRamaMasLarga :: Mapa -> [Dir]
+caminoDeLaRamaMasLarga (Fin _) = []
+caminoDeLaRamaMasLarga (Bifurcacion _ m1 m2) = if esMasAltoQue m1 m2
+                                                then (Izq : caminoDeLaRamaMasLarga m1)
+                                                else (Der : caminoDeLaRamaMasLarga m2)
+
+--
+
+tesorosDeListaDeObjetos :: [Objeto] -> [Objeto]
+tesorosDeListaDeObjetos [] = []
+tesorosDeListaDeObjetos (obj:objs) = if esTesoro obj 
+                                        then obj : tesorosDeListaDeObjetos objs
+                                        else tesorosDeListaDeObjetos objs
+
+tesorosDeCofre :: Cofre -> [Objeto]
+tesorosDeCofre (Cofre objs) = tesorosDeListaDeObjetos objs
+
+tesorosPorNivel :: Mapa -> [[Objeto]]
+tesorosPorNivel (Fin c) = [tesorosDeCofre c]
+tesorosPorNivel (Bifurcacion c m1 m2) = tesorosDeCofre c : agruparPorNivel (tesorosPorNivel m1) (tesorosPorNivel m2)
+
+--
+
+todosLosCaminos :: Mapa -> [[Dir]]
+todosLosCaminos (Fin c) = [[]]
+todosLosCaminos (Bifurcacion c m1 m2) = consACada Izq (todosLosCaminos m1)
+                                     ++ consACada Der (todosLosCaminos m2)
