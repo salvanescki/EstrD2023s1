@@ -229,3 +229,106 @@ todosLosCaminos :: Mapa -> [[Dir]]
 todosLosCaminos (Fin c) = [[]]
 todosLosCaminos (Bifurcacion c m1 m2) = consACada Izq (todosLosCaminos m1)
                                      ++ consACada Der (todosLosCaminos m2)
+
+------------------------------------Nave Espacial------------------------------------
+
+data Componente = LanzaTorpedos | Motor Int | Almacen [Barril]
+        deriving Show
+data Barril = Comida | Oxigeno | Torpedo | Combustible
+        deriving Show
+data Sector = S SectorId [Componente] [Tripulante]
+        deriving Show
+
+type SectorId = String
+type Tripulante = String
+
+data Tree a = EmptyT | NodeT a (Tree a) (Tree a)
+        deriving Show
+
+data Nave = N (Tree Sector)
+        deriving Show
+
+ejNave = N (NodeT (S "j6" [LanzaTorpedos, (Motor 1), (Almacen [Comida, Oxigeno, Torpedo, Combustible])] ["Jesus", "Juan", "Jose", "Jeremias", "Jacobo", "Julián"])
+                (NodeT (S "a2" [LanzaTorpedos, (Motor 2), (Almacen [Comida, Oxigeno, Torpedo, Combustible])] ["Ariel", "Amadeo"])
+                    (EmptyT)
+                    (EmptyT)
+                )
+                (NodeT (S "b2" [LanzaTorpedos, (Motor 3), (Almacen [Comida, Oxigeno, Torpedo, Combustible])] ["Benito", "Bartolomeo"])
+                    (EmptyT)
+                    (EmptyT)
+                )
+            )
+
+--
+
+idSector :: Sector -> SectorId
+idSector (S id _ _) = id
+
+sectoresT :: Tree Sector -> [SectorId]
+sectoresT EmptyT = []
+sectoresT (NodeT s t1 t2) = idSector s : sectoresT t1 ++ sectoresT t2
+
+sectores :: Nave -> [SectorId]
+sectores (N t) = sectoresT t
+
+--
+
+propulsionC :: Componente -> Int
+propulsionC (Motor p) = p
+propulsionC _ = 0
+
+propulsionCs :: [Componente] -> Int
+propulsionCs [] = 0
+propulsionCs (c:cs) = propulsionC c + propulsionCs cs
+
+propulsionS :: Sector -> Int
+propulsionS (S _ cs _) = propulsionCs cs
+
+propulsionT :: Tree Sector -> Int
+propulsionT EmptyT = 0
+propulsionT (NodeT s t1 t2) = propulsionS s + propulsionT t1 + propulsionT t2
+
+poderDePropulsion :: Nave -> Int
+poderDePropulsion (N t) = propulsionT t
+
+--
+
+barrilesC :: Componente -> [Barril]
+barrilesC (Almacen barriles) = barriles
+barrilesC _ = []
+
+barrilesCs :: [Componente] -> [Barril]
+barrilesCs [] = []
+barrilesCs (c:cs) = barrilesC c ++ barrilesCs cs
+
+barrilesS :: Sector -> [Barril]
+barrilesS (S _ cs _) = barrilesCs cs
+
+barrilesT :: Tree Sector -> [Barril]
+barrilesT EmptyT = []
+barrilesT (NodeT s t1 t2) = barrilesS s ++ barrilesT t1 ++ barrilesT t2
+
+barriles :: Nave -> [Barril]
+barriles (N t) = barrilesT t
+
+--
+
+esMismoSectorId :: SectorId -> SectorId -> Bool
+esMismoSectorId id1 id2 = id1 == id2
+
+agregarComponentes :: [Componente] -> Sector -> Sector
+agregarComponentes cs1 (S id cs2 ts) = S id (cs1 ++ cs2) ts
+
+agregarASectorS :: [Componente] -> SectorId -> Sector -> Sector
+agregarASectorS cs1 id1 s = if esMismoSectorId id1 (idSector s)
+                                            then agregarComponentes cs1 s
+                                            else s
+
+agregarASectorT :: [Componente] -> SectorId -> Tree Sector -> Tree Sector
+agregarASectorT cs id EmptyT = EmptyT
+agregarASectorT cs id (NodeT s t1 t2) = NodeT (agregarASectorS cs id s) (agregarASectorT cs id t1) (agregarASectorT cs id t2)
+
+agregarASector :: [Componente] -> SectorId -> Nave -> Nave
+-- En caso de no existir el sector en la nave, no añade la lista
+agregarASector [] _ n = n
+agregarASector cs id (N t) = N (agregarASectorT cs id t)
