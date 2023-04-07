@@ -195,14 +195,20 @@ ramaMasLarga (NodeT x lt rt) = x : ramaMasLarga(elArbolMasAltoEntre lt rt)
 
 --
 
-generarCamino :: a -> [[a]] -> [[a]]
-generarCamino x [] = []
-generarCamino x (xs:xss) = (x:xs) : generarCamino x xss
+consACada :: a -> [[a]] -> [[a]]
+consACada x [] = []
+consACada x (xs:xss) = (x:xs) : consACada x xss
 
 todosLosCaminos :: Tree a -> [[a]]
-todosLosCaminos EmptyT = []
-todosLosCaminos (NodeT x EmptyT EmptyT) = [[x]]
-todosLosCaminos (NodeT x lt rt) = generarCamino x (todosLosCaminos lt ++ todosLosCaminos rt)
+todosLosCaminos EmptyT          = []
+todosLosCaminos (NodeT x lt rt) = [x] :
+                                   consACada x (todosLosCaminos lt)
+                                ++ consACada x (todosLosCaminos rt)
+
+todosLosCaminosMaximales :: Tree a -> [[a]]
+todosLosCaminosMaximales EmptyT = []
+todosLosCaminosMaximales (NodeT x EmptyT EmptyT) = [[x]]
+todosLosCaminosMaximales (NodeT x lt rt) = consACada x (todosLosCaminosMaximales lt ++ todosLosCaminosMaximales rt)
 
 -- Expresiones Aritméticas --
 
