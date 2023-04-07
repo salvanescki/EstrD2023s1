@@ -258,6 +258,11 @@ ejNave = N (NodeT (S "j6" [LanzaTorpedos, (Motor 1), (Almacen [Comida, Oxigeno, 
                     (EmptyT)
                 )
             )
+-- De prácticas anteriores
+
+pertenece :: Eq a => a -> [a] -> Bool
+pertenece _ [] = False
+pertenece e (x:xs) = e == x || pertenece e xs
 
 --
 
@@ -332,3 +337,53 @@ agregarASector :: [Componente] -> SectorId -> Nave -> Nave
 -- En caso de no existir el sector en la nave, no añade la lista
 agregarASector [] _ n = n
 agregarASector cs id (N t) = N (agregarASectorT cs id t)
+
+--
+
+asignarTripulanteAS :: Tripulante -> Sector -> Sector
+asignarTripulanteAS tp (S id cps tps) = S id cps (tp:tps)
+
+asignarTripulanteAT :: Tripulante -> [SectorId] -> Tree Sector -> Tree Sector
+asignarTripulanteAT _ _ EmptyT = EmptyT
+asignarTripulanteAT tp [] (NodeT s t1 t2) = NodeT s (asignarTripulanteAT tp [] t1) (asignarTripulanteAT tp [] t2)
+asignarTripulanteAT tp (st:sts) (NodeT s t1 t2) = if esMismoSectorId st (idSector s) 
+                                                    then NodeT (asignarTripulanteAS tp s) (asignarTripulanteAT tp sts t1) (asignarTripulanteAT tp sts t2)
+                                                    else NodeT s (asignarTripulanteAT tp sts t1) (asignarTripulanteAT tp sts t2)
+
+asignarTripulanteA :: Tripulante -> [SectorId] -> Nave -> Nave
+-- PRECOND: Todos los id de la lista pertenecen a la Nave
+asignarTripulanteA tp [] (N t) = N t
+asignarTripulanteA tp sts (N t) = N (asignarTripulanteAT tp sts t)
+
+--
+
+esTripulanteAsignadoASector :: Tripulante -> Sector -> Bool
+esTripulanteAsignadoASector tp (S id cps tps) = pertenece tp tps
+
+sectoresAsignadosT :: Tripulante -> Tree Sector -> [SectorId]
+sectoresAsignadosT tp EmptyT = []
+sectoresAsignadosT tp (NodeT s t1 t2) = if esTripulanteAsignadoASector tp s 
+                                            then idSector s : sectoresAsignadosT tp t1 ++ sectoresAsignadosT tp t2
+                                            else sectoresAsignadosT tp t1 ++ sectoresAsignadosT tp t2
+
+sectoresAsignados :: Tripulante -> Nave -> [SectorId]
+sectoresAsignados tp (N t) = sectoresAsignadosT tp t
+
+--
+
+sinRepetir :: Eq a => [a] -> [a]
+sinRepetir [] = []
+sinRepetir (x:xs) = if pertenece x xs
+                        then xs
+                        else x:xs
+
+tripulantesS :: Sector -> [Tripulante]
+tripulantesS (S id cps tps) = tps
+
+tripulantesT :: Tree Sector -> [Tripulante]
+tripulantesT EmptyT = []
+tripulantesT (NodeT s t1 t2) = tripulantesS s ++ tripulantesT t1 ++ tripulantesT t2
+
+tripulantes :: Nave -> [Tripulante]
+tripulantes (N t) = sinRepetir(tripulantesT t)
+
