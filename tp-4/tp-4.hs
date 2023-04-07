@@ -387,3 +387,153 @@ tripulantesT (NodeT s t1 t2) = tripulantesS s ++ tripulantesT t1 ++ tripulantesT
 tripulantes :: Nave -> [Tripulante]
 tripulantes (N t) = sinRepetir(tripulantesT t)
 
+------------------------------------Manada de Lobos------------------------------------
+
+type Presa = String
+type Territorio = String
+type Nombre = String
+data Lobo = Cazador Nombre [Presa] Lobo Lobo Lobo
+            | Explorador Nombre [Territorio] Lobo Lobo
+            | Cria Nombre
+            deriving Show
+data Manada = M Lobo
+            deriving Show
+
+--
+
+ejManada = M (Cazador "Roberto" ["Presa1", "Presa2", "Presa3", "Presa4", "Presa5", "Presa6"] 
+                (Explorador "Diego" ["Quilmes", "Berazategui"] 
+                    (Cria "Cria2")
+                    (Cria "Cria3")
+                )
+                (Explorador "Dora" ["Bernal", "Berazategui"] 
+                    (Cria "Cria4")
+                    (Cria "Cria5")
+                )
+                (Cria "Cria1")
+            )
+
+ejManada2 = M (Cazador "Beta" ["Presa1", "Presa2"]
+                (Cazador "Gamma" ["Presa1"] 
+                    (Cria "Cria2")
+                    (Cria "Cria3")
+                    (Cria "Cria4")
+                )
+                (Cazador "Omega" [] 
+                    (Cria "Cria5")
+                    (Cria "Cria6")
+                    (Cazador "Alfa" ["Presa1", "Presa2", "Presa3"]
+                        (Cria "Cria7")
+                        (Cria "Cria8")
+                        (Cria "Cria9")
+                    )
+                )
+                (Cria "Cria1")
+            )
+
+--De las prácticas anteriores
+unoSiCeroSino :: Bool -> Int
+unoSiCeroSino True = 1
+unoSiCeroSino False = 0
+--
+
+esCria :: Lobo -> Bool
+esCria (Cria _) = True
+esCria _ = False
+
+unoSiEsCriaSinoCantDeCrias :: Lobo -> Int
+unoSiEsCriaSinoCantDeCrias (Cria _) = 1
+unoSiEsCriaSinoCantDeCrias l = cantidadDeCriasL l
+
+cantidadDeCriasL :: Lobo -> Int
+cantidadDeCriasL (Explorador _ _ l1 l2) = unoSiEsCriaSinoCantDeCrias l1 + unoSiEsCriaSinoCantDeCrias l2
+cantidadDeCriasL (Cazador _ _ l1 l2 l3) = unoSiEsCriaSinoCantDeCrias l1 + unoSiEsCriaSinoCantDeCrias l2 + unoSiEsCriaSinoCantDeCrias l3
+
+cantidadDeCrias :: Manada -> Int
+cantidadDeCrias (M l) = unoSiEsCriaSinoCantDeCrias l
+
+cantidadDeAlimentoL :: Lobo -> Int
+cantidadDeAlimentoL (Cria _) = 0
+cantidadDeAlimentoL (Explorador _ _ l1 l2) = cantidadDeAlimentoL l1 + cantidadDeAlimentoL l2
+cantidadDeAlimentoL (Cazador _ ps l1 l2 l3) = length ps + cantidadDeAlimentoL l1 + cantidadDeAlimentoL l2 + cantidadDeAlimentoL l3
+
+cantidadDeAlimento :: Manada -> Int
+cantidadDeAlimento (M l) = cantidadDeAlimentoL l
+
+buenaCaza :: Manada -> Bool
+buenaCaza m = cantidadDeAlimento m > cantidadDeCrias m
+
+--
+
+elegirEntre :: (Nombre, Int) -> (Nombre, Int) -> (Nombre, Int)
+elegirEntre (n1, c1) (n2, c2) = if (c1>=c2) then (n1, c1)
+                                                else (n2, c2)
+
+elegir :: [ (Nombre, Int) ] -> (Nombre, Int)
+-- PRECOND: la lista no es vacía
+elegir (nc : [])  = nc
+elegir (nc : ncs) = elegirEntre nc (elegir ncs)
+
+elAlfaL :: Lobo -> (Nombre, Int)
+elAlfaL (Cazador n presas l1 l2 l3) = elegir [ (n, length presas)
+                                                , elAlfaL l1
+                                                , elAlfaL l2
+                                                , elAlfaL l3
+                                                ]
+elAlfaL (Explorador n _ l1 l2)      = elegir [ elAlfaL l1
+                                                , elAlfaL l2
+                                                , (n, 0)
+                                                ]
+elAlfaL (Cria n)                    = (n, 0)
+
+elAlfa :: Manada -> (Nombre, Int)
+elAlfa (M l) = elAlfaL l
+
+--
+
+losQueExploraronL :: Territorio -> Lobo -> [Nombre]
+losQueExploraronL t (Cria _) = []
+losQueExploraronL t (Cazador n ps l1 l2 l3) = losQueExploraronL t l1 ++ losQueExploraronL t l2 ++ losQueExploraronL t l3
+losQueExploraronL t (Explorador n ts l1 l2) = if pertenece t ts 
+                                                then n : losQueExploraronL t l1 ++ losQueExploraronL t l2
+                                                else losQueExploraronL t l1 ++ losQueExploraronL t l2
+
+losQueExploraron :: Territorio -> Manada -> [Nombre]
+losQueExploraron t (M l) = losQueExploraronL t l
+
+--
+
+estaEnLosTerritorios :: Territorio -> [Territorio] -> Bool
+estaEnLosTerritorios _ [] = False
+estaEnLosTerritorios t1 (t2:t2s) = if t1 == t2
+                                    then True
+                                    else False || estaEnLosTerritorios t1 t2s
+
+sinTerritoriosRepetidos :: [Territorio] -> [Territorio]
+sinTerritoriosRepetidos [] = []
+sinTerritoriosRepetidos (t:ts) = if estaEnLosTerritorios t ts
+                                    then sinTerritoriosRepetidos ts
+                                    else t : sinTerritoriosRepetidos ts
+
+territoriosL :: Lobo -> [Territorio]
+territoriosL (Cria _) = []
+territoriosL (Explorador _ ts l1 l2) = ts ++ territoriosL l1 ++ territoriosL l2
+territoriosL (Cazador _ _ l1 l2 l3) = territoriosL l1 ++ territoriosL l2 ++ territoriosL l3
+
+territorios :: Manada -> [Territorio]
+territorios (M l) = sinTerritoriosRepetidos(territoriosL l)
+
+exploradoresPorTerritorioDeLista :: [Territorio] -> Manada -> [(Territorio, [Nombre])]
+exploradoresPorTerritorioDeLista [] _ = []
+exploradoresPorTerritorioDeLista (t:ts) m = (t, losQueExploraron t m) : exploradoresPorTerritorioDeLista ts m
+
+exploradoresPorTerritorio :: Manada -> [(Territorio, [Nombre])]
+exploradoresPorTerritorio m = exploradoresPorTerritorioDeLista (territorios m) m
+
+--
+
+nombreDe :: Lobo -> Nombre
+nombreDe (Cria n) = n
+nombreDe (Cazador n _ _ _ _) = n
+nombreDe (Explorador n _ _ _) = n
+
