@@ -538,3 +538,4 @@ nombreDe (Cazador n _ _ _ _) = n
 nombreDe (Explorador n _ _ _) = n
 
 --
+--
