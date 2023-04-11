@@ -328,23 +328,15 @@ cantQueTrabajanEn :: [Proyecto] -> Empresa -> Int
 cantQueTrabajanEn pjs e = cantEmpleadosTrabajandoEnProyectosEnListaRoles (rolesEnEmpresa e) pjs
 --
 
-parRepetido :: (Proyecto, Int) -> (Proyecto, Int) -> Bool
-parRepetido (p1,n1) (p2,n2) = proyectoEsIgualA p1 p2
+agregarProyectoAListaDePares :: Proyecto -> [(Proyecto, Int)] -> [(Proyecto, Int)]
+agregarProyectoAListaDePares p [] = [(p, 1)]
+agregarProyectoAListaDePares p ((pj,n) : pjns) = if proyectoEsIgualA p pj 
+                                                        then (pj, n + 1) : pjns
+                                                        else (pj, n) : agregarProyectoAListaDePares p pjns
 
-parPerteneceALista :: (Proyecto, Int) -> [(Proyecto, Int)] -> Bool
-parPerteneceALista _ [] = False
-parPerteneceALista pi (pn:pns) = parRepetido pi pn || parPerteneceALista pi pns
-
-listaParesProyectoCantidadSinRepetir :: [(Proyecto, Int)] -> [(Proyecto, Int)]
-listaParesProyectoCantidadSinRepetir [] = []
-listaParesProyectoCantidadSinRepetir (pn : pns) = if parPerteneceALista pn pns
-                                                        then listaParesProyectoCantidadSinRepetir pns
-                                                        else pn : listaParesProyectoCantidadSinRepetir pns
-
-cantEmpleadosAsignadosPorProyecto :: [Proyecto] -> [Rol] -> [(Proyecto, Int)]
-cantEmpleadosAsignadosPorProyecto [] _ = []
-cantEmpleadosAsignadosPorProyecto _ [] = []
-cantEmpleadosAsignadosPorProyecto (pj:pjs) rls = (pj, cantEmpleadosTrabajandoEnProyectosEnListaRoles rls [pj]) : cantEmpleadosAsignadosPorProyecto pjs rls
+cantEmpleadosAsignadosPorProyecto :: [Rol] -> [(Proyecto, Int)]
+cantEmpleadosAsignadosPorProyecto [] = []
+cantEmpleadosAsignadosPorProyecto (r:rls) = agregarProyectoAListaDePares (proyectoDeRol r) (cantEmpleadosAsignadosPorProyecto rls)
 
 asignadosPorProyecto :: Empresa -> [(Proyecto, Int)]
-asignadosPorProyecto e = listaParesProyectoCantidadSinRepetir (cantEmpleadosAsignadosPorProyecto (proyectosEnListaDeRoles (rolesEnEmpresa e)) (rolesEnEmpresa e))
+asignadosPorProyecto e = cantEmpleadosAsignadosPorProyecto (rolesEnEmpresa e)
