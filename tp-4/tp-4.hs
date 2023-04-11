@@ -537,3 +537,80 @@ nombreDe (Cria n) = n
 nombreDe (Cazador n _ _ _ _) = n
 nombreDe (Explorador n _ _ _) = n
 
+superioresDelCazadorL :: Nombre -> Lobo -> [Nombre]
+--PRECOND: hay un cazador con dicho nombre y es único.
+superioresDelCazadorL nc (Cria _) = []
+superioresDelCazadorL nc (Cazador n ps l1 l2 l3) = if nc == n
+                                                    then [] ++ 
+                                                    superioresDelCazadorL nc l1 ++ 
+                                                    superioresDelCazadorL nc l2 ++ 
+                                                    superioresDelCazadorL nc l3
+                                                    else 
+                                                    superioresDelCazadorL nc l1 ++ 
+                                                    superioresDelCazadorL nc l2 ++ 
+                                                    superioresDelCazadorL nc l3
+superioresDelCazadorL nc (Explorador n ts l1 l2) = superioresDelCazadorL nc l1 ++ superioresDelCazadorL nc l2
+
+superioresDelCazador :: Nombre -> Manada -> [Nombre]
+--PRECOND: hay un cazador con dicho nombre y es único.
+superioresDelCazador n (M l) = superioresDelCazadorL n l
+
+{-
+superioresDelCazadorL :: Nombre -> Lobo -> [Nombre]
+--PRECOND: hay un cazador con dicho nombre y es único.
+superioresDelCazadorL nc (Cria _) = []
+superioresDelCazadorL nc (Cazador n ps l1 l2 l3) = if nc == nombreDe l1 || nc == nombreDe l2 || nc == nombreDe l3
+                                                    then n : superioresDelCazadorL nc l1 ++ superioresDelCazadorL nc l2 ++ superioresDelCazadorL nc l3
+                                                    else superioresDelCazadorL nc l1 ++ superioresDelCazadorL nc l2 ++ superioresDelCazadorL nc l3
+superioresDelCazadorL nc (Explorador n ts l1 l2) = if nc == nombreDe l1 || nc == nombreDe l2
+                                                    then n : superioresDelCazadorL nc l1 ++ superioresDelCazadorL nc l2
+                                                    else superioresDelCazadorL nc l1 ++ superioresDelCazadorL nc l2
+
+tieneAlCazador :: Nombre -> Lobo -> Bool
+tieneAlCazador _ (Cria _) = False
+tieneAlCazador n (Explorador _ _ l1 l2) = tieneAlCazador n l1 || tieneAlCazador n l2
+tieneAlCazador n (Cazador n2 _ l1 l2 l3) = n == n2 || tieneAlCazador n l1 || tieneAlCazador n l2 || tieneAlCazador n l3
+
+elQueTieneAlCazadorEntre :: Nombre -> Lobo -> Lobo -> Lobo
+elQueTieneAlCazadorEntre n l1 l2 = if tieneAlCazador n l1
+                                then l1
+                                else l2
+
+nivelDeEn :: Nombre -> Lobo -> Int
+nivelDeEn _ (Cria _) = 0
+nivelDeEn n (Explorador _ _ l1 l2) = if tieneAlCazador n l1
+                                        then 1 + nivelDeEn n l1
+                                        else 1 + nivelDeEn n l2
+nivelDeEn n (Cazador n2 _ l1 l2 l3) = if n == n2
+                                        then 0
+                                        else 1 + (nivelDeEn n (elQueTieneAlCazadorEntre n l3 (elQueTieneAlCazadorEntre n l1 l2)))
+
+nivelesDeCazadores :: Lobo -> Lobo -> [(Int, Nombre)]
+nivelesDeCazadores lobo (Cria _) = []
+nivelesDeCazadores lobo (Explorador _ _ l1 l2) = nivelesDeCazadores lobo l1 ++ nivelesDeCazadores lobo l2
+nivelesDeCazadores lobo (Cazador n _ l1 l2 l3) = ((nivelDeEn n lobo), n) :
+                                                 (nivelesDeCazadores lobo l1 ++ nivelesDeCazadores lobo l2 ++ nivelesDeCazadores lobo l3)
+
+
+
+nivelTupla :: (Int, Nombre) -> Int
+nivelTupla (n, nom) = n
+
+superioresDe :: [(Int, Nombre)] -> Int -> [Nombre]
+superioresDe [] n = []
+superioresDe (x:xs) n = if nivelTupla x < n 
+                            then (nombreTupla x) : losQueEstanArribaDeEn xs n
+                            else losQueEstanArribaDeEn xs n
+
+superioresDelCazadorL :: Nombre -> Lobo -> [Nombre]
+--PRECOND: hay un cazador con dicho nombre y es único.
+superioresDelCazadorL nc (Cria _) = []
+superioresDelCazadorL nc l = superioresDe (nivelesDeCazadores l l) (nivelDeEn nc l)
+
+superioresDelCazador :: Nombre -> Manada -> [Nombre]
+--PRECOND: hay un cazador con dicho nombre y es único.
+superioresDelCazador n (M l) = superioresDelCazadorL n l
+
+Consejo: hace que haya un if que cuando dentro de la lista que te devuelve la recursion está el nodo que estas buscando, construya con el nombre del nodo actual
+
+-}
