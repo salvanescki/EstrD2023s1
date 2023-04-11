@@ -281,14 +281,17 @@ proyectosEnListaDeRoles :: [Rol] -> [Proyecto]
 proyectosEnListaDeRoles [] = []
 proyectosEnListaDeRoles (r:rls) = proyectoDeRol r : proyectosEnListaDeRoles rls
 
+agregarSiNoEsta :: Proyecto -> [Proyecto] -> [Proyecto]
+agregarSiNoEsta pj [] = [pj]
+agregarSiNoEsta pj pjs = if proyectoPerteneceALista pj pjs then pjs else pj:pjs
+
 listaProyectosSinRepetir :: [Proyecto] -> [Proyecto]
 listaProyectosSinRepetir [] = []
-listaProyectosSinRepetir (pj:pjs) = if proyectoPerteneceALista pj pjs
-                                        then listaProyectosSinRepetir pjs
-                                        else pj : listaProyectosSinRepetir pjs
+listaProyectosSinRepetir (pj:pjs) = agregarSiNoEsta pj (listaProyectosSinRepetir pjs)
 
 proyectos :: Empresa -> [Proyecto]
 proyectos e = listaProyectosSinRepetir(proyectosEnListaDeRoles (rolesEnEmpresa e))
+
 --
 
 seniorityEsIgualA :: Seniority -> Seniority -> Bool
