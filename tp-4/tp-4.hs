@@ -450,7 +450,44 @@ ejManada2 = M (Cazador "Beta" ["Presa1", "Presa2"]
                 )
                 (Cria "Cria1")
             )
-
+listaDeLobos = [(Cazador "Beta" ["Presa1", "Presa2"]
+                (Cazador "Gamma" ["Presa1"] 
+                    (Cria "Cria2")
+                    (Cria "Cria3")
+                    (Cria "Cria4")
+                )
+                (Cazador "Omega" [] 
+                    (Cria "Cria5")
+                    (Cria "Cria6")
+                    (Cazador "Alfa" ["Presa1", "Presa2", "Presa3"]
+                        (Cria "Cria7")
+                        (Cria "Cria8")
+                        (Cria "Cria9")
+                    )
+                )
+                (Cria "Cria1")
+            ), (Cazador "Gamma" ["Presa1"] 
+                    (Cria "Cria2")
+                    (Cria "Cria3")
+                    (Cria "Cria4")
+                ), (Cazador "Omega" [] 
+                    (Cria "Cria5")
+                    (Cria "Cria6")
+                    (Cazador "Alfa" ["Presa1", "Presa2", "Presa3"]
+                        (Cria "Cria7")
+                        (Cria "Cria8")
+                        (Cria "Cria9")
+                    )
+                ), (Cria "Cria1"), (Cazador "Alfa" ["Presa1", "Presa2", "Presa3"]
+                        (Cria "Cria7")
+                        (Cria "Cria8")
+                        (Cria "Cria9")
+                    ), (Cria "Cria2"),
+                    (Cria "Cria3"),
+                    (Cria "Cria4"),(Cria "Cria5"),
+                    (Cria "Cria6"),(Cria "Cria7"),
+                        (Cria "Cria8"),
+                        (Cria "Cria9")]
 --De las prácticas anteriores
 unoSiCeroSino :: Bool -> Int
 unoSiCeroSino True = 1
@@ -552,33 +589,50 @@ exploradoresPorTerritorio m = exploradoresPorTerritorioDeLista (territorios m) m
 
 --
 
+estaVacia :: [a] -> Bool
+estaVacia [] = True
+estaVacia _ = False
+
+agregarSi :: a -> [a] -> Bool -> [a]
+agregarSi x xs c = if c then (x:xs) else xs
+
 nombreDe :: Lobo -> Nombre
 nombreDe (Cria n) = n
 nombreDe (Cazador n _ _ _ _) = n
 nombreDe (Explorador n _ _ _) = n
 
-esMismoNombre :: Nombre -> Nombre -> Bool
-esMismoNombre n1 n2 = n1 == n2
+esCazador :: Lobo -> Bool
+esCazador (Cazador _ _ _ _ _) = True
+esCazador _ = False
 
-listaSiTienePorSubordinado :: Nombre -> [Nombre] -> [Nombre]
-listaSiTienePorSubordinado n ns = if pertenece n ns then ns else []
+nombresDe :: [Lobo] -> [Nombre]
+nombresDe [] = []
+nombresDe (l:ls) = nombreDe l : nombresDe ls
 
-loboYSubordinadosDeLobo :: Lobo -> [Nombre]
-loboYSubordinadosDeLobo (Cria n) = [n]
-loboYSubordinadosDeLobo (Explorador n _ l1 l2) = n: nombreDe l1 : nombreDe l2 : loboYSubordinadosDeLobo l1 ++ loboYSubordinadosDeLobo l2
-loboYSubordinadosDeLobo (Cazador n _ l1 l2 l3) = n: nombreDe l1 : nombreDe l2 : nombreDe l3 : loboYSubordinadosDeLobo l1 ++ loboYSubordinadosDeLobo l2 ++ loboYSubordinadosDeLobo l3
+soloCazadores :: [Lobo] -> [Lobo]
+soloCazadores [] = []
+soloCazadores (l:ls) = agregarSi l (soloCazadores ls) (esCazador l)
 
-siEsSubordinadoAgregarSuperior :: Nombre -> [Nombre] -> Nombre -> [Nombre] -> [Nombre]
-siEsSubordinadoAgregarSuperior n1 subs n2 sups = if pertenece n1 subs then n2 : sups else sups
-
-superioresDelCazadorL :: Nombre -> Lobo -> [Nombre]
-superioresDelCazadorL n1 (Cria _) = []
-superioresDelCazadorL n1 (Explorador n2 _ l1 l2) = siEsSubordinadoAgregarSuperior n1 (loboYSubordinadosDeLobo l1) n2 (superioresDelCazadorL n1 l1)
-                                                    ++ siEsSubordinadoAgregarSuperior n1 (loboYSubordinadosDeLobo l2) n2 (superioresDelCazadorL n1 l2)
-superioresDelCazadorL n1 (Cazador n2 _ l1 l2 l3) = siEsSubordinadoAgregarSuperior n1 (loboYSubordinadosDeLobo l1) n2 (superioresDelCazadorL n1 l1)
-                                                    ++ siEsSubordinadoAgregarSuperior n1 (loboYSubordinadosDeLobo l2) n2 (superioresDelCazadorL n1 l2)
-                                                    ++ siEsSubordinadoAgregarSuperior n1 (loboYSubordinadosDeLobo l3) n2 (superioresDelCazadorL n1 l3)
+todosLosSuperiores :: Nombre -> Lobo -> [Lobo]
+-- COMENTARIO: Se utiliza unión de listas para evaluar si el cazador buscado se encuentra entre los descendientes, ya que si no está alli, las listas son vacías.
+todosLosSuperiores n (Cria n2) = []
+todosLosSuperiores n (Explorador n2 ts l1 l2) = 
+    let descendientes = todosLosSuperiores n l1 ++ todosLosSuperiores n l2
+        exploradorActual = (Explorador n2 ts l1 l2)
+    in if nombreDe l1 == n || nombreDe l2 == n
+            then [exploradorActual]
+            else if not(estaVacia (descendientes))
+                then exploradorActual : descendientes
+                else []
+todosLosSuperiores n (Cazador n2 ps l1 l2 l3) =
+    let descendientes = todosLosSuperiores n l1 ++ todosLosSuperiores n l2 ++ todosLosSuperiores n l3
+        cazadorActual = (Cazador n2 ps l1 l2 l3)
+    in if nombreDe l1 == n || nombreDe l2 == n || nombreDe l3 == n
+            then [cazadorActual]
+                else if not(estaVacia (descendientes))
+                    then cazadorActual : descendientes
+                    else []
 
 superioresDelCazador :: Nombre -> Manada -> [Nombre]
 --PRECOND: hay un cazador con dicho nombre y es único.
-superioresDelCazador n (M l) = superioresDelCazadorL n l
+superioresDelCazador n (M l) = nombresDe(soloCazadores(todosLosSuperiores n l))
