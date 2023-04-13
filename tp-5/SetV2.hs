@@ -1,4 +1,4 @@
-module Set 
+module SetV2 
     (Set, emptyS, addS, belongs, sizeS, removeS, unionS, setToList)
 where
 
@@ -16,8 +16,11 @@ pertenece :: Eq a => a -> [a] -> Bool
 pertenece _ [] = False
 pertenece e (x:xs) = e == x || pertenece e xs
 
-agregarSiNoEsta :: Eq a => a -> Set a -> Set a
-agregarSiNoEsta x (S xs) = if pertenece x xs then (S xs) else (S (x:xs))
+sinRepetir :: Eq a => [a] -> [a]
+sinRepetir [] = []
+sinRepetir (x:xs) = if pertenece x xs
+                        then xs
+                        else x:xs
 
 sacar :: Eq a => a -> [a] -> [a]
 sacar n [] = []
@@ -25,14 +28,10 @@ sacar n (x:xs) = if n == x
                     then xs
                     else x : sacar n xs
 
-unionL :: Eq a => [a] -> [a] -> [a]
-unionL [] ys = ys
-unionL (x:xs) ys = if pertenece x ys then unionL xs ys else x : unionL xs ys
-
 emptyS = S []
-addS x s = agregarSiNoEsta x s
+addS x (S xs) = S (x:xs)
 belongs x (S xs) = pertenece x xs
-sizeS (S xs) = length xs
+sizeS (S xs) = length (sinRepetir xs)
 removeS x (S xs) = S (sacar x xs)
-unionS (S xs) (S ys) = S (unionL xs ys)
-setToList (S xs) = xs
+unionS (S xs) (S ys) = S (xs ++ ys)
+setToList (S xs) = sinRepetir xs
