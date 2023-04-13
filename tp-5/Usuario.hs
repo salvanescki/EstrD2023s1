@@ -1,4 +1,4 @@
-import Set -- Set, emptyS, addS, belongs, sizeS, removeS, unionS, setToList
+import SetV2 -- Set, emptyS, addS, belongs, sizeS, removeS, unionS, setToList
 
 -- Library
 
@@ -33,3 +33,5 @@ data Tree a = EmptyT
 unirTodos :: Eq a => Tree (Set a) -> Set a
 unirTodos EmptyT = emptyS
 unirTodos (NodeT s t1 t2) = unionS s (unionS (unirTodos t1) (unirTodos t2))
+
+--
