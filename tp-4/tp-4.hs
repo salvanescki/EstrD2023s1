@@ -188,7 +188,27 @@ hayTesoroEn (d:ds) (Bifurcacion c m1 m2) = if esIzq d
 
 --
 
-{-Tengo que arreglarlo, solo devuelve los casos donde el tesoro se encuentra en una Bifurcación, pero no los casos en donde está en un Fin-}
+{-Tengo que arreglarlo, solo devuelve los casos donde el tesoro se encuentra en una Bifurcación, pero no los casos en donde está en un Fin
+
+loboYSubordinadosDeLobo :: Lobo -> [Nombre]
+loboYSubordinadosDeLobo (Cria n) = [n]
+loboYSubordinadosDeLobo (Explorador n _ l1 l2) = n: nombreDe l1 : nombreDe l2 : loboYSubordinadosDeLobo l1 ++ loboYSubordinadosDeLobo l2
+loboYSubordinadosDeLobo (Cazador n _ l1 l2 l3) = n: nombreDe l1 : nombreDe l2 : nombreDe l3 : loboYSubordinadosDeLobo l1 ++ loboYSubordinadosDeLobo l2 ++ loboYSubordinadosDeLobo l3
+
+siEsSubordinadoAgregarSuperior :: Nombre -> [Nombre] -> Nombre -> [Nombre] -> [Nombre]
+siEsSubordinadoAgregarSuperior n1 subs n2 sups = if pertenece n1 subs then n2 : sups else sups
+
+superioresDelCazadorL :: Nombre -> Lobo -> [Nombre]
+superioresDelCazadorL n1 (Cria _) = []
+superioresDelCazadorL n1 (Explorador n2 _ l1 l2) = siEsSubordinadoAgregarSuperior n1 (loboYSubordinadosDeLobo l1) n2 (superioresDelCazadorL n1 l1)
+                                                    ++ siEsSubordinadoAgregarSuperior n1 (loboYSubordinadosDeLobo l2) n2 (superioresDelCazadorL n1 l2)
+superioresDelCazadorL n1 (Cazador n2 _ l1 l2 l3) = siEsSubordinadoAgregarSuperior n1 (loboYSubordinadosDeLobo l1) n2 (superioresDelCazadorL n1 l1)
+                                                    ++ siEsSubordinadoAgregarSuperior n1 (loboYSubordinadosDeLobo l2) n2 (superioresDelCazadorL n1 l2)
+                                                    ++ siEsSubordinadoAgregarSuperior n1 (loboYSubordinadosDeLobo l3) n2 (superioresDelCazadorL n1 l3)
+superioresDelCazador :: Nombre -> Manada -> [Nombre]
+--PRECOND: hay un cazador con dicho nombre y es único.
+superioresDelCazador n (M l) = superioresDelCazadorL n l
+-}
 
 caminoAlTesoro :: Mapa -> [Dir]
 --PRECOND: Existe un único tesoro
@@ -537,38 +557,11 @@ nombreDe (Cria n) = n
 nombreDe (Cazador n _ _ _ _) = n
 nombreDe (Explorador n _ _ _) = n
 
-{-
-type Presa = String
-type Territorio = String
-type Nombre = String
-data Lobo = Cazador Nombre [Presa] Lobo Lobo Lobo
-            | Explorador Nombre [Territorio] Lobo Lobo
-            | Cria Nombre
-            deriving Show
-data Manada = M Lobo
-            deriving Show
--}
-
 esMismoNombre :: Nombre -> Nombre -> Bool
 esMismoNombre n1 n2 = n1 == n2
 
 listaSiTienePorSubordinado :: Nombre -> [Nombre] -> [Nombre]
 listaSiTienePorSubordinado n ns = if pertenece n ns then ns else []
-
-{-
-si tiene por subordinado agregar su nombre, sino no
--}
-
-{-
-subordinadosDe :: Lobo -> [Lobo]
-loboYSubordinadosDeLobo (Cria _) = []
-loboYSubordinadosDeLobo (Explorador _ _ l1 l2) = [l1,l2]
-loboYSubordinadosDeLobo (Cazador _ _ l1 l2 l3) = [l1,l2,l3]
-
-superioresDelCazadorL :: Nombre -> Lobo -> [Nombre]
-superioresDelCazadorL n1 lobo = if pertenece n1 (loboYSubordinadosDeLobo lobo) 
-                                then (nombreDe lobo) : superioresDelCazadorL (subordinadosDe lobo)
--}
 
 loboYSubordinadosDeLobo :: Lobo -> [Nombre]
 loboYSubordinadosDeLobo (Cria n) = [n]
@@ -585,82 +578,7 @@ superioresDelCazadorL n1 (Explorador n2 _ l1 l2) = siEsSubordinadoAgregarSuperio
 superioresDelCazadorL n1 (Cazador n2 _ l1 l2 l3) = siEsSubordinadoAgregarSuperior n1 (loboYSubordinadosDeLobo l1) n2 (superioresDelCazadorL n1 l1)
                                                     ++ siEsSubordinadoAgregarSuperior n1 (loboYSubordinadosDeLobo l2) n2 (superioresDelCazadorL n1 l2)
                                                     ++ siEsSubordinadoAgregarSuperior n1 (loboYSubordinadosDeLobo l3) n2 (superioresDelCazadorL n1 l3)
-{-
-
-superioresDelCazadorL :: Nombre -> Lobo -> [Nombre]
---PRECOND: hay un cazador con dicho nombre y es único.
-superioresDelCazadorL nc (Cria _) = []
-superioresDelCazadorL nc (Cazador n ps l1 l2 l3) = if nc == n
-                                                    then [] ++ 
-                                                    superioresDelCazadorL nc l1 ++ 
-                                                    superioresDelCazadorL nc l2 ++ 
-                                                    superioresDelCazadorL nc l3
-                                                    else 
-                                                    superioresDelCazadorL nc l1 ++ 
-                                                    superioresDelCazadorL nc l2 ++ 
-                                                    superioresDelCazadorL nc l3
-superioresDelCazadorL nc (Explorador n ts l1 l2) = superioresDelCazadorL nc l1 ++ superioresDelCazadorL nc l2
--}
-superioresDelCazador :: Nombre -> Manada -> [Nombre]
---PRECOND: hay un cazador con dicho nombre y es único.
-superioresDelCazador n (M l) = superioresDelCazadorL n l
-
-{-
-superioresDelCazadorL :: Nombre -> Lobo -> [Nombre]
---PRECOND: hay un cazador con dicho nombre y es único.
-superioresDelCazadorL nc (Cria _) = []
-superioresDelCazadorL nc (Cazador n ps l1 l2 l3) = if nc == nombreDe l1 || nc == nombreDe l2 || nc == nombreDe l3
-                                                    then n : superioresDelCazadorL nc l1 ++ superioresDelCazadorL nc l2 ++ superioresDelCazadorL nc l3
-                                                    else superioresDelCazadorL nc l1 ++ superioresDelCazadorL nc l2 ++ superioresDelCazadorL nc l3
-superioresDelCazadorL nc (Explorador n ts l1 l2) = if nc == nombreDe l1 || nc == nombreDe l2
-                                                    then n : superioresDelCazadorL nc l1 ++ superioresDelCazadorL nc l2
-                                                    else superioresDelCazadorL nc l1 ++ superioresDelCazadorL nc l2
-
-tieneAlCazador :: Nombre -> Lobo -> Bool
-tieneAlCazador _ (Cria _) = False
-tieneAlCazador n (Explorador _ _ l1 l2) = tieneAlCazador n l1 || tieneAlCazador n l2
-tieneAlCazador n (Cazador n2 _ l1 l2 l3) = n == n2 || tieneAlCazador n l1 || tieneAlCazador n l2 || tieneAlCazador n l3
-
-elQueTieneAlCazadorEntre :: Nombre -> Lobo -> Lobo -> Lobo
-elQueTieneAlCazadorEntre n l1 l2 = if tieneAlCazador n l1
-                                then l1
-                                else l2
-
-nivelDeEn :: Nombre -> Lobo -> Int
-nivelDeEn _ (Cria _) = 0
-nivelDeEn n (Explorador _ _ l1 l2) = if tieneAlCazador n l1
-                                        then 1 + nivelDeEn n l1
-                                        else 1 + nivelDeEn n l2
-nivelDeEn n (Cazador n2 _ l1 l2 l3) = if n == n2
-                                        then 0
-                                        else 1 + (nivelDeEn n (elQueTieneAlCazadorEntre n l3 (elQueTieneAlCazadorEntre n l1 l2)))
-
-nivelesDeCazadores :: Lobo -> Lobo -> [(Int, Nombre)]
-nivelesDeCazadores lobo (Cria _) = []
-nivelesDeCazadores lobo (Explorador _ _ l1 l2) = nivelesDeCazadores lobo l1 ++ nivelesDeCazadores lobo l2
-nivelesDeCazadores lobo (Cazador n _ l1 l2 l3) = ((nivelDeEn n lobo), n) :
-                                                 (nivelesDeCazadores lobo l1 ++ nivelesDeCazadores lobo l2 ++ nivelesDeCazadores lobo l3)
-
-
-
-nivelTupla :: (Int, Nombre) -> Int
-nivelTupla (n, nom) = n
-
-superioresDe :: [(Int, Nombre)] -> Int -> [Nombre]
-superioresDe [] n = []
-superioresDe (x:xs) n = if nivelTupla x < n 
-                            then (nombreTupla x) : losQueEstanArribaDeEn xs n
-                            else losQueEstanArribaDeEn xs n
-
-superioresDelCazadorL :: Nombre -> Lobo -> [Nombre]
---PRECOND: hay un cazador con dicho nombre y es único.
-superioresDelCazadorL nc (Cria _) = []
-superioresDelCazadorL nc l = superioresDe (nivelesDeCazadores l l) (nivelDeEn nc l)
 
 superioresDelCazador :: Nombre -> Manada -> [Nombre]
 --PRECOND: hay un cazador con dicho nombre y es único.
 superioresDelCazador n (M l) = superioresDelCazadorL n l
-
-Consejo: hace que haya un if que cuando dentro de la lista que te devuelve la recursion está el nodo que estas buscando, construya con el nombre del nodo actual
-
--}
