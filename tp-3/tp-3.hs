@@ -91,6 +91,20 @@ hayTesoroEn 0 (Cofre objs cm) = hayTesoroEnLista objs
 hayTesoroEn n cm = hayTesoroEn (n - 1) (siguienteCamino cm)
 
 --
+-- En caso que la cantidad de tesoros sea por tesoro individual y no por cofre:
+cantTesorosEnLista :: [Objeto] -> Int
+cantTesorosEnLista [] = 0
+cantTesorosEnLista (obj:objs) = unoSiCeroSino(esTesoro obj) + cantTesorosEnLista objs
+
+cantTesorosEnCamino :: Camino -> Int
+cantTesorosEnCamino Fin = 0
+cantTesorosEnCamino (Cofre objs cm) = cantTesorosEnLista objs + cantTesorosEnCamino cm
+cantTesorosEnCamino (Nada cm) = cantTesorosEnCamino cm
+
+alMenosNTesoros :: Int -> Camino -> Bool
+alMenosNTesoros n cm = cantTesorosEnCamino cm >= n
+
+{-En caso que la cantidad de tesoros en camino sea la cantidad de cofres con al menos un tesoro
 
 cantTesorosEnCamino :: Camino -> Int
 cantTesorosEnCamino Fin = 0
@@ -99,6 +113,7 @@ cantTesorosEnCamino (Nada cm) = cantTesorosEnCamino cm
 
 alMenosNTesoros :: Int -> Camino -> Bool
 alMenosNTesoros n cm = cantTesorosEnCamino cm >= n
+-}
 
 --
 
