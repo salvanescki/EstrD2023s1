@@ -188,8 +188,7 @@ hayTesoroEn (d:ds) (Bifurcacion c m1 m2) = if esIzq d
 
 --
 
-{-Tengo que arreglarlo, solo devuelve los casos donde el tesoro se encuentra en una Bifurcación, pero no los casos en donde está en un Fin
-
+{-
 loboYSubordinadosDeLobo :: Lobo -> [Nombre]
 loboYSubordinadosDeLobo (Cria n) = [n]
 loboYSubordinadosDeLobo (Explorador n _ l1 l2) = n: nombreDe l1 : nombreDe l2 : loboYSubordinadosDeLobo l1 ++ loboYSubordinadosDeLobo l2
@@ -210,6 +209,7 @@ superioresDelCazador :: Nombre -> Manada -> [Nombre]
 superioresDelCazador n (M l) = superioresDelCazadorL n l
 -}
 
+-- Tengo que arreglarlo, solo devuelve los casos donde el tesoro se encuentra en una Bifurcación, pero no los casos en donde está en un Fin
 caminoAlTesoro :: Mapa -> [Dir]
 --PRECOND: Existe un único tesoro
 caminoAlTesoro (Fin c) = []
