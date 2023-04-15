@@ -79,6 +79,11 @@ pasosHastaTesoro (Nada cm) = 1 + pasosHastaTesoro cm
 
 --
 
+siguienteCamino :: Camino -> Camino
+-- PRECOND: El camino no debe ser Fin
+siguienteCamino (Cofre _ cm) = cm
+siguienteCamino (Nada cm) = cm
+
 esCofreConTesoro :: Camino -> Bool
 esCofreConTesoro (Cofre objs _) = hayTesoroEnLista objs
 esCofreConTesoro _ = False
@@ -89,38 +94,22 @@ hayTesoroEn n cm = hayTesoroEn (n - 1) (siguienteCamino cm)
 
 --
 
-
--- En caso que la cantidad de tesoros sea por tesoro individual y no por cofre:
 cantTesorosEnLista :: [Objeto] -> Int
 cantTesorosEnLista [] = 0
 cantTesorosEnLista (obj:objs) = unoSiCeroSino(esTesoro obj) + cantTesorosEnLista objs
+
+alMenosNTesoros :: Int -> Camino -> Bool
+alMenosNTesoros 0 _ = True
+alMenosNTesoros _ Fin = False
+alMenosNTesoros n (Nada cm) = alMenosNTesoros n cm
+alMenosNTesoros n (Cofre objs cm) = alMenosNTesoros (n - cantTesorosEnLista objs) cm
+
+--
 
 cantTesorosEnCamino :: Camino -> Int
 cantTesorosEnCamino Fin = 0
 cantTesorosEnCamino (Cofre objs cm) = cantTesorosEnLista objs + cantTesorosEnCamino cm
 cantTesorosEnCamino (Nada cm) = cantTesorosEnCamino cm
-
-alMenosNTesoros :: Int -> Camino -> Bool
-alMenosNTesoros n cm = cantTesorosEnCamino cm >= n
-
-{-En caso que la cantidad de tesoros en camino sea la cantidad de cofres con al menos un tesoro
-
-cantTesorosEnCamino :: Camino -> Int
-cantTesorosEnCamino Fin = 0
-cantTesorosEnCamino (Cofre objs cm) = unoSiCeroSino(hayTesoroEnLista objs) + cantTesorosEnCamino cm
-cantTesorosEnCamino (Nada cm) = cantTesorosEnCamino cm
-
-alMenosNTesoros :: Int -> Camino -> Bool
-alMenosNTesoros n cm = cantTesorosEnCamino cm >= n
--}
-{-
-cantTesorosEnLista :: [Objeto] -> Int
-cantTesorosEnLista [] = 0
-cantTesorosEnLista (obj:objs) = unoSiCeroSino(esTesoro obj) + cantTesorosEnLista objs
-
-alMenosNTesoros :: Int -> Camino -> Bool
--}
---
 
 cantTesorosDesde :: Int -> Camino -> Int
 -- PRECOND: i>=0
