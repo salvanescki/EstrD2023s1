@@ -175,6 +175,7 @@ toList EmptyT = []
 toList (NodeT x lt rt) = toList lt ++ [x] ++ toList rt
 
 levelN :: Int -> Tree a -> [a]
+levelN _ EmptyT = []
 levelN 0 (NodeT x _ _) = [x]
 levelN n (NodeT x lt rt) = levelN (n-1) lt ++ levelN (n-1) rt
 
@@ -192,15 +193,12 @@ listPerLevel (NodeT x lt rt) = [x] : concatenarHojasPorNivel (listPerLevel lt) (
 
 --
 
-elArbolMasAltoEntre :: Tree a -> Tree a -> Tree a
-elArbolMasAltoEntre EmptyT t = t
-elArbolMasAltoEntre t EmptyT = t
-elArbolMasAltoEntre t1 t2 = if heightT t1 > heightT t2 then t1 else t2
+listaMasLarga :: [a] -> [a] -> [a]
+listaMasLarga xs ys = if length xs > length ys then xs else ys
 
 ramaMasLarga :: Tree a -> [a]
 ramaMasLarga EmptyT = []
-ramaMasLarga (NodeT x EmptyT EmptyT) = [x]
-ramaMasLarga (NodeT x lt rt) = x : ramaMasLarga(elArbolMasAltoEntre lt rt)
+ramaMasLarga (NodeT x lt rt) = x : listaMasLarga (ramaMasLarga lt) (ramaMasLarga rt)
 
 --
 
