@@ -79,16 +79,8 @@ pasosHastaTesoro (Nada cm) = 1 + pasosHastaTesoro cm
 
 --
 
-siguienteCamino :: Camino -> Camino
--- PRECOND: El camino no debe ser Fin
-siguienteCamino (Cofre _ cm) = cm
-siguienteCamino (Nada cm) = cm
-
 hayTesoroEn :: Int -> Camino -> Bool
-hayTesoroEn _ Fin = False
-hayTesoroEn 0 (Nada _) = False
-hayTesoroEn 0 (Cofre objs cm) = hayTesoroEnLista objs
-hayTesoroEn n cm = hayTesoroEn (n - 1) (siguienteCamino cm)
+hayTesoroEn n cm = n == pasosHastaTesoro cm
 
 --
 -- En caso que la cantidad de tesoros sea por tesoro individual y no por cofre:
