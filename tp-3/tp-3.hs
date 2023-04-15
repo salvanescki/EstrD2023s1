@@ -168,7 +168,7 @@ heightT (NodeT _ lt rt) = 1 + max (heightT lt) (heightT rt)
 
 mirrorT :: Tree a -> Tree a
 mirrorT EmptyT = EmptyT
-mirrorT (NodeT x lt rt) = (NodeT x (mirrorT rt) (mirrorT lt))
+mirrorT (NodeT x lt rt) = NodeT x (mirrorT rt) (mirrorT lt)
 
 toList :: Tree a -> [a]
 toList EmptyT = []
