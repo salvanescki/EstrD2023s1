@@ -73,8 +73,8 @@ hayTesoro (Nada cm) = hayTesoro cm
 
 pasosHastaTesoro :: Camino -> Int
 -- PRECOND: Tiene que haber al menos un Tesoro
-pasosHastaTesoro Fin = 0
-pasosHastaTesoro (Cofre objs cm) = if hayTesoroEnLista objs then 0 else pasosHastaTesoro cm
+pasosHastaTesoro Fin = error "Debe haber por lo menos 1 tesoro en el camino"
+pasosHastaTesoro (Cofre objs cm) = if hayTesoroEnLista objs then 0 else 1 + pasosHastaTesoro cm
 pasosHastaTesoro (Nada cm) = 1 + pasosHastaTesoro cm
 
 --
@@ -84,38 +84,32 @@ siguienteCamino :: Camino -> Camino
 siguienteCamino (Cofre _ cm) = cm
 siguienteCamino (Nada cm) = cm
 
+esCofreConTesoro :: Camino -> Bool
+esCofreConTesoro (Cofre objs _) = hayTesoroEnLista objs
+esCofreConTesoro _ = False
+
 hayTesoroEn :: Int -> Camino -> Bool
-hayTesoroEn _ Fin = False
-hayTesoroEn 0 (Nada _) = False
-hayTesoroEn 0 (Cofre objs cm) = hayTesoroEnLista objs
+hayTesoroEn 0 cm = esCofreConTesoro cm
 hayTesoroEn n cm = hayTesoroEn (n - 1) (siguienteCamino cm)
 
 --
--- En caso que la cantidad de tesoros sea por tesoro individual y no por cofre:
+
 cantTesorosEnLista :: [Objeto] -> Int
 cantTesorosEnLista [] = 0
 cantTesorosEnLista (obj:objs) = unoSiCeroSino(esTesoro obj) + cantTesorosEnLista objs
+
+alMenosNTesoros :: Int -> Camino -> Bool
+alMenosNTesoros 0 _ = True
+alMenosNTesoros _ Fin = False
+alMenosNTesoros n (Nada cm) = alMenosNTesoros n cm
+alMenosNTesoros n (Cofre objs cm) = alMenosNTesoros (n - cantTesorosEnLista objs) cm
+
+--
 
 cantTesorosEnCamino :: Camino -> Int
 cantTesorosEnCamino Fin = 0
 cantTesorosEnCamino (Cofre objs cm) = cantTesorosEnLista objs + cantTesorosEnCamino cm
 cantTesorosEnCamino (Nada cm) = cantTesorosEnCamino cm
-
-alMenosNTesoros :: Int -> Camino -> Bool
-alMenosNTesoros n cm = cantTesorosEnCamino cm >= n
-
-{-En caso que la cantidad de tesoros en camino sea la cantidad de cofres con al menos un tesoro
-
-cantTesorosEnCamino :: Camino -> Int
-cantTesorosEnCamino Fin = 0
-cantTesorosEnCamino (Cofre objs cm) = unoSiCeroSino(hayTesoroEnLista objs) + cantTesorosEnCamino cm
-cantTesorosEnCamino (Nada cm) = cantTesorosEnCamino cm
-
-alMenosNTesoros :: Int -> Camino -> Bool
-alMenosNTesoros n cm = cantTesorosEnCamino cm >= n
--}
-
---
 
 cantTesorosDesde :: Int -> Camino -> Int
 -- PRECOND: i>=0
@@ -174,13 +168,14 @@ heightT (NodeT _ lt rt) = 1 + max (heightT lt) (heightT rt)
 
 mirrorT :: Tree a -> Tree a
 mirrorT EmptyT = EmptyT
-mirrorT (NodeT x lt rt) = (NodeT x (mirrorT rt) (mirrorT lt))
+mirrorT (NodeT x lt rt) = NodeT x (mirrorT rt) (mirrorT lt)
 
 toList :: Tree a -> [a]
 toList EmptyT = []
 toList (NodeT x lt rt) = toList lt ++ [x] ++ toList rt
 
 levelN :: Int -> Tree a -> [a]
+levelN _ EmptyT = []
 levelN 0 (NodeT x _ _) = [x]
 levelN n (NodeT x lt rt) = levelN (n-1) lt ++ levelN (n-1) rt
 
@@ -198,15 +193,12 @@ listPerLevel (NodeT x lt rt) = [x] : concatenarHojasPorNivel (listPerLevel lt) (
 
 --
 
-elArbolMasAltoEntre :: Tree a -> Tree a -> Tree a
-elArbolMasAltoEntre EmptyT t = t
-elArbolMasAltoEntre t EmptyT = t
-elArbolMasAltoEntre t1 t2 = if heightT t1 > heightT t2 then t1 else t2
+listaMasLarga :: [a] -> [a] -> [a]
+listaMasLarga xs ys = if length xs > length ys then xs else ys
 
 ramaMasLarga :: Tree a -> [a]
 ramaMasLarga EmptyT = []
-ramaMasLarga (NodeT x EmptyT EmptyT) = [x]
-ramaMasLarga (NodeT x lt rt) = x : ramaMasLarga(elArbolMasAltoEntre lt rt)
+ramaMasLarga (NodeT x lt rt) = x : listaMasLarga (ramaMasLarga lt) (ramaMasLarga rt)
 
 --
 
