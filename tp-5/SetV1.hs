@@ -33,6 +33,6 @@ emptyS = S [] 0
 addS x s = agregarSiNoEsta x s
 belongs x (S xs l) = pertenece x xs
 sizeS (S xs l) = l
-removeS x (S xs l) = S (sacar x xs) (l - 1)
+removeS x (S xs l) = S (sacar x xs) (length xs) -- O(2n) -> O(n)
 unionS (S xs l1) (S ys l2) = S (unionL xs ys) (length (unionL xs ys)) -- #xs + #ys - #(xs n ys)
 setToList (S xs l) = xs

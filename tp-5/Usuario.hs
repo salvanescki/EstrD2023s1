@@ -1,4 +1,4 @@
-import SetV2 -- Set, emptyS, addS, belongs, sizeS, removeS, unionS, setToList
+import SetV1 -- Set, emptyS, addS, belongs, sizeS, removeS, unionS, setToList
 
 -- Library
 

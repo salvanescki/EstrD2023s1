@@ -4,19 +4,19 @@ where
 
 data Set a = S [a]
 
-emptyS :: Set a
-addS :: Eq a => a -> Set a -> Set a
-belongs :: Eq a => a -> Set a -> Bool
-sizeS :: Eq a => Set a -> Int
-removeS :: Eq a => a -> Set a -> Set a
-unionS :: Eq a => Set a -> Set a -> Set a
-setToList :: Eq a => Set a -> [a]
+emptyS :: Set a                                             -- O(1)
+addS :: Eq a => a -> Set a -> Set a                         -- O(1)
+belongs :: Eq a => a -> Set a -> Bool                       -- O(n)
+sizeS :: Eq a => Set a -> Int                               -- O(n^2)
+removeS :: Eq a => a -> Set a -> Set a                      -- O(n)
+unionS :: Eq a => Set a -> Set a -> Set a                   -- O(n)
+setToList :: Eq a => Set a -> [a]                           -- O(n^2)
 
-pertenece :: Eq a => a -> [a] -> Bool
+pertenece :: Eq a => a -> [a] -> Bool   -- O(n)
 pertenece _ [] = False
 pertenece e (x:xs) = e == x || pertenece e xs
 
-sinRepetir :: Eq a => [a] -> [a]
+sinRepetir :: Eq a => [a] -> [a]    -- O(n^2) en el peor caso
 sinRepetir [] = []
 sinRepetir (x:xs) = if pertenece x xs
                         then xs
@@ -31,7 +31,7 @@ sacar n (x:xs) = if n == x
 emptyS = S []
 addS x (S xs) = S (x:xs)
 belongs x (S xs) = pertenece x xs
-sizeS (S xs) = length (sinRepetir xs)
+sizeS (S xs) = length (sinRepetir xs) -- O(n) + O(n^2) -> O(n^2)
 removeS x (S xs) = S (sacar x xs)
 unionS (S xs) (S ys) = S (xs ++ ys)
 setToList (S xs) = sinRepetir xs
