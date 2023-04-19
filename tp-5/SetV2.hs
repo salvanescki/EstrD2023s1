@@ -6,11 +6,11 @@ data Set a = S [a]
 
 emptyS :: Set a                                             -- O(1)
 addS :: Eq a => a -> Set a -> Set a                         -- O(1)
-belongs :: Eq a => a -> Set a -> Bool                       -- O(n)
-sizeS :: Eq a => Set a -> Int                               -- O(n^2)
+belongs :: Eq a => a -> Set a -> Bool                       -- O(n) con n los elementos de la lista (puede ser mayor al n del Set)
+sizeS :: Eq a => Set a -> Int                               -- O(n^2) con n los elementos de la lista (puede ser mayor al n del Set)
 removeS :: Eq a => a -> Set a -> Set a                      -- O(n)
-unionS :: Eq a => Set a -> Set a -> Set a                   -- O(n)
-setToList :: Eq a => Set a -> [a]                           -- O(n^2)
+unionS :: Eq a => Set a -> Set a -> Set a                   -- O(n) con n los elementos de algunas de las listas o su suma (puede ser mayor al n de sus Sets)
+setToList :: Eq a => Set a -> [a]                           -- O(n^2) con n los elementos de la lista (puede ser mayor al n del Set)
 
 pertenece :: Eq a => a -> [a] -> Bool   -- O(n)
 pertenece _ [] = False

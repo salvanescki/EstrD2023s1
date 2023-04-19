@@ -45,7 +45,7 @@ unirTodos (NodeT s t1 t2) = unionS s (unionS (unirTodos t1) (unirTodos t2))
 
 --
 
-lengthQ :: Queue a -> Int
+lengthQ :: Queue a -> Int                                           -- O(n)
 lengthQ q = if (isEmptyQ q) then 0 else 1 + lengthQ (dequeue q)
 
 --
