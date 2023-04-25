@@ -63,3 +63,27 @@ mapToList mp = mapToListK (keys mp) mp
 
 --
 
+
+ejLista = [
+            ("a", 1),
+            ("a", 2),
+            ("a", 3),
+            ("b", 4),
+            ("b", 5),
+            ("c", 6)
+          ]
+
+{-
+
+{ "a":[1,2,3], "b":[4,5], "c":[6] }
+
+-}
+
+agruparEq :: Ord k => [(k, v)] -> Map k [v]
+agruparEq [] = emptyM
+agruparEq ((k,v): kvs) = if pertenece k (keys (agruparEq kvs))
+                            then assocM k (v : fromJust(lookupM k (agruparEq kvs))) (agruparEq kvs)
+                            else assocM k [v] (agruparEq kvs)
+
+--
+
