@@ -21,7 +21,14 @@ ejMap :: Map String Int
 ejMap = assocM "4" 4
         $ assocM "3" 3
         $ assocM "2" 2
-        $ assocM "1" 1
+        $ assocM "a" 1
+        $ emptyM
+
+ejMap2 :: Map String Int
+ejMap2 = assocM "d" 8
+        $ assocM "c" 7
+        $ assocM "b" 6
+        $ assocM "a" 5
         $ emptyM
 
 pertenece :: Eq a => a -> [a] -> Bool
@@ -87,14 +94,19 @@ agruparEq ((k,v): kvs) = if pertenece k (keys (agruparEq kvs))
                             else assocM k [v] (agruparEq kvs)
 
 --
-{-
-incrementarK :: Ord k => [k] -> [k] -> Map k Int -> Map k Int
-incrementarK 
-incrementar :: Eq k => [k] -> Map k Int -> Map k Int
-incrementar ks mp = incrementarK ks (keys mp) mp
--}
 
 incrementar :: Ord k => [k] -> Map k Int -> Map k Int
 -- PRECOND: Las keys de la lista deben pertenecer al map
 incrementar [] _ = emptyM
 incrementar (k:ks) mp = assocM k (1 + fromJust(lookupM k mp)) (incrementar ks mp)
+
+--
+
+mergeMapsK:: Ord k => [k] -> Map k v -> Map k v -> Map k v
+mergeMapsK [] _ m2 = m2
+mergeMapsK (k:ks) m1 m2 = assocM k (fromJust(lookupM k m1)) (mergeMapsK ks m1 m2)
+
+mergeMaps:: Ord k => Map k v -> Map k v -> Map k v
+mergeMaps m1 m2 = mergeMapsK (keys m1) m1 m2
+
+--
