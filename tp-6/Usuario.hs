@@ -17,6 +17,7 @@ heapSort xs = priorityQueueToList (listToPriorityQueue xs)
 
 --
 
+ejMap :: Map String Int
 ejMap = assocM "4" 4
         $ assocM "3" 3
         $ assocM "2" 2
@@ -86,4 +87,14 @@ agruparEq ((k,v): kvs) = if pertenece k (keys (agruparEq kvs))
                             else assocM k [v] (agruparEq kvs)
 
 --
+{-
+incrementarK :: Ord k => [k] -> [k] -> Map k Int -> Map k Int
+incrementarK 
+incrementar :: Eq k => [k] -> Map k Int -> Map k Int
+incrementar ks mp = incrementarK ks (keys mp) mp
+-}
 
+incrementar :: Ord k => [k] -> Map k Int -> Map k Int
+-- PRECOND: Las keys de la lista deben pertenecer al map
+incrementar [] _ = emptyM
+incrementar (k:ks) mp = assocM k (1 + fromJust(lookupM k mp)) (incrementar ks mp)
