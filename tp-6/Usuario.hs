@@ -1,5 +1,5 @@
 import PriorityQueue -- PriorityQueue, emptyPQ, isEmptyPQ, insertPQ, findMinPQ, deleteMinPQ
-import MapV1 -- Map, emptyM, assocM, lookupM, deleteM, keys
+import MapV3 -- Map, emptyM, assocM, lookupM, deleteM, keys
 --
 
 -- O(n^2) ya que aplica findMinPQ y deleteMinPQ [ambas O(n)] para cada elemento en la PQ (misma cantidad que la lista)
