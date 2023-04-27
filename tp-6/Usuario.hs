@@ -1,5 +1,6 @@
 import PriorityQueue -- PriorityQueue, emptyPQ, isEmptyPQ, insertPQ, findMinPQ, deleteMinPQ
 import MapV3 -- Map, emptyM, assocM, lookupM, deleteM, keys
+import MultiSet -- MultiSet, emptyMS, addMS, ocurrencesMS, unionMS, intersectionMS, multiSetToList
 import SetV1
 --
 
@@ -188,3 +189,6 @@ ocurrencias cs = ocurrenciasS (sinRepetidos cs) cs
 
 --
 
+ocurrenciasMS :: String -> MultiSet Char
+ocurrenciasMS [] = emptyMS
+ocurrenciasMS (c:cs) = addMS c (ocurrenciasMS cs)
