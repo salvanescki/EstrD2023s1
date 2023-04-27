@@ -78,19 +78,20 @@ pasosHastaTesoro (Cofre objs cm) = if hayTesoroEnLista objs then 0 else 1 + paso
 pasosHastaTesoro (Nada cm) = 1 + pasosHastaTesoro cm
 
 --
-
+{-
 siguienteCamino :: Camino -> Camino
 -- PRECOND: El camino no debe ser Fin
 siguienteCamino (Cofre _ cm) = cm
 siguienteCamino (Nada cm) = cm
-
+-}
 esCofreConTesoro :: Camino -> Bool
 esCofreConTesoro (Cofre objs _) = hayTesoroEnLista objs
 esCofreConTesoro _ = False
 
 hayTesoroEn :: Int -> Camino -> Bool
 hayTesoroEn 0 cm = esCofreConTesoro cm
-hayTesoroEn n cm = hayTesoroEn (n - 1) (siguienteCamino cm)
+hayTesoroEn n (Cofre _ cm) = hayTesoroEn (n - 1) cm
+hayTesoroEn n (Nada cm) = hayTesoroEn (n - 1) cm
 
 --
 
