@@ -153,4 +153,5 @@ Se me ocurren dos formas de hacer este:
         coste n, coste n-1, ..., coste 3, coste 2, coste 1
   por lo que es un O(n^2) rebajadísimo, pero no me gusta tanto como la de arriba que es O(n)
 
+
 -}
