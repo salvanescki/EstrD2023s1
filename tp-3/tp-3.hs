@@ -90,6 +90,7 @@ esCofreConTesoro _ = False
 
 hayTesoroEn :: Int -> Camino -> Bool
 hayTesoroEn 0 cm = esCofreConTesoro cm
+hayTesoroEn n Fin = False
 hayTesoroEn n (Cofre _ cm) = hayTesoroEn (n - 1) cm
 hayTesoroEn n (Nada cm) = hayTesoroEn (n - 1) cm
 
