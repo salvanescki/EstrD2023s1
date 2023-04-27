@@ -1,5 +1,7 @@
 import PriorityQueue -- PriorityQueue, emptyPQ, isEmptyPQ, insertPQ, findMinPQ, deleteMinPQ
 import MapV3 -- Map, emptyM, assocM, lookupM, deleteM, keys
+import MultiSet -- MultiSet, emptyMS, addMS, ocurrencesMS, unionMS, intersectionMS, multiSetToList
+import SetV1
 --
 
 -- O(n^2) ya que aplica findMinPQ y deleteMinPQ [ambas O(n)] para cada elemento en la PQ (misma cantidad que la lista)
@@ -143,3 +145,50 @@ mergeMaps:: Ord k => Map k v -> Map k v -> Map k v
 mergeMaps m1 m2 = mergeMapsK (keys m1) m1 m2
 
 --
+{-
+
+indexar :: [a] -> Map Int a
+
+Se me ocurren dos formas de hacer este:
+- Con doble PM, llamando a una subtarea que se le pase el length xs y la lista, y que vaya reduciendo el numero de length xs a 0 (siendo estos los index)
+- Con length xs en cada iteración. Este cuesta un poco más ya que toma el length de lo que devuelve la recursión. Hace básicamente esto:
+        coste n, coste n-1, ..., coste 3, coste 2, coste 1
+  por lo que es un O(n^2) rebajadísimo, pero no me gusta tanto como la de arriba que es O(n)
+
+
+-}
+
+-- O(n^2)
+indexar :: [a] -> Map Int a
+indexar [] = emptyM
+indexar (x:xs) = assocM (length (keys(indexar xs))) x (indexar xs)
+
+-- O(n^2)
+
+unoSiCeroSino :: Bool -> Int
+unoSiCeroSino True = 1
+unoSiCeroSino False = 0
+
+apariciones :: Eq a => a -> [a] -> Int
+apariciones _ [] = 0
+apariciones e (x:xs) = unoSiCeroSino(e == x) + apariciones e xs
+
+sinRepetidosS :: Eq a => [a] -> Set a
+sinRepetidosS [] = SetV1.emptyS
+sinRepetidosS (x:xs) = addS x (sinRepetidosS xs)
+
+sinRepetidos :: Eq a => [a] -> [a]
+sinRepetidos xs = setToList (sinRepetidosS xs)
+
+ocurrenciasS :: String -> String -> Map Char Int
+ocurrenciasS [] _ = emptyM
+ocurrenciasS (c:cs) s = assocM c (apariciones c s) (ocurrenciasS cs s)
+
+ocurrencias :: String -> Map Char Int
+ocurrencias cs = ocurrenciasS (sinRepetidos cs) cs
+
+--
+
+ocurrenciasMS :: String -> MultiSet Char
+ocurrenciasMS [] = emptyMS
+ocurrenciasMS (c:cs) = addMS c (ocurrenciasMS cs)
