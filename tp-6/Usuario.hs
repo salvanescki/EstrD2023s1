@@ -1,5 +1,6 @@
 import PriorityQueue -- PriorityQueue, emptyPQ, isEmptyPQ, insertPQ, findMinPQ, deleteMinPQ
 import MapV3 -- Map, emptyM, assocM, lookupM, deleteM, keys
+import SetV1
 --
 
 -- O(n^2) ya que aplica findMinPQ y deleteMinPQ [ambas O(n)] para cada elemento en la PQ (misma cantidad que la lista)
@@ -155,3 +156,35 @@ Se me ocurren dos formas de hacer este:
 
 
 -}
+
+-- O(n^2)
+indexar :: [a] -> Map Int a
+indexar [] = emptyM
+indexar (x:xs) = assocM (length (keys(indexar xs))) x (indexar xs)
+
+-- O(n^2)
+
+unoSiCeroSino :: Bool -> Int
+unoSiCeroSino True = 1
+unoSiCeroSino False = 0
+
+apariciones :: Eq a => a -> [a] -> Int
+apariciones _ [] = 0
+apariciones e (x:xs) = unoSiCeroSino(e == x) + apariciones e xs
+
+sinRepetidosS :: Eq a => [a] -> Set a
+sinRepetidosS [] = SetV1.emptyS
+sinRepetidosS (x:xs) = addS x (sinRepetidosS xs)
+
+sinRepetidos :: Eq a => [a] -> [a]
+sinRepetidos xs = setToList (sinRepetidosS xs)
+
+ocurrenciasS :: String -> String -> Map Char Int
+ocurrenciasS [] _ = emptyM
+ocurrenciasS (c:cs) s = assocM c (apariciones c s) (ocurrenciasS cs s)
+
+ocurrencias :: String -> Map Char Int
+ocurrencias cs = ocurrenciasS (sinRepetidos cs) cs
+
+--
+
