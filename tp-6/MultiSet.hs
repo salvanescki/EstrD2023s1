@@ -11,11 +11,32 @@ data MultiSet a = MS (Map a Int)
 emptyMS :: MultiSet a
 addMS :: Ord a => a -> MultiSet a -> MultiSet a
 ocurrencesMS :: Ord a => a -> MultiSet a -> Int
-unionMS :: Ord a => MultiSet a -> MultiSet a -> MultiSet a
+unionMS :: Ord a => MultiSet a -> MultiSet a -> MultiSet a          -- ARREGLAR
 intersectionMS :: Ord a => MultiSet a -> MultiSet a -> MultiSet a
 multiSetToList :: Ord a => MultiSet a -> [(a, Int)]
 
 --
+ejMS = addMS "a"
+        $ addMS "a"
+        $ addMS "a"
+        $ addMS "a"
+        $ addMS "b"
+        $ addMS "b"
+        $ addMS "b"
+        $ addMS "c"
+        $ addMS "c"
+        $ emptyMS
+
+ejMS2 = addMS "a"
+        $ addMS "a"
+        $ addMS "d"
+        $ addMS "d"
+        $ addMS "e"
+        $ addMS "e"
+        $ addMS "e"
+        $ addMS "f"
+        $ addMS "f"
+        $ emptyMS
 
 pertenece :: Eq a => a -> [a] -> Bool
 pertenece _ [] = False
@@ -25,12 +46,11 @@ fromJust :: Maybe a -> a
 -- PRECOND: No puede ser Nothing
 fromJust (Just x) = x
 
-mergeMapsK:: Ord k => [k] -> Map k v -> Map k v -> Map k v
-mergeMapsK [] _ m2 = m2
-mergeMapsK (k:ks) m1 m2 = assocM k (fromJust(lookupM k m1)) (mergeMapsK ks m1 m2)
-
-mergeMaps:: Ord k => Map k v -> Map k v -> Map k v
-mergeMaps m1 m2 = mergeMapsK (keys m1) m1 m2
+unionMap :: Ord a => [a] -> [a] -> Map a Int -> Map a Int -> Map a Int
+unionMap [] _ _ m2 = m2
+unionMap (x:xs) ys m1 m2 = if pertenece x ys
+                                    then assocM x ((ocurrencesMap x m1) + (ocurrencesMap x m2)) (unionMap xs ys m1 m2)
+                                    else assocM x (ocurrencesMap x m1) (unionMap xs ys m1 m2)
 
 mapDe :: MultiSet a -> Map a Int
 mapDe (MS m) = m 
@@ -44,12 +64,9 @@ intersectionMap (x:xs) ys m1 m2 = if pertenece x ys
                                     then assocM x ((ocurrencesMap x m1) + (ocurrencesMap x m2)) (intersectionMap xs ys m1 m2)
                                     else intersectionMap xs ys m1 m2
 
-mapToListK :: Ord k => [k] -> Map k v -> [(k, v)]
-mapToListK [] _ = []
-mapToListK (k:ks) mp = (k, ocurrencesMap k mp) : mapToListK ks mp
-
-mapToList :: Ord k => Map k v -> [(k, v)]
-mapToList mp = mapToListK (keys mp) mp
+multiSetToListK :: Ord a => [a] -> Map a Int -> [(a, Int)]
+multiSetToListK [] _ = []
+multiSetToListK (k:ks) mp = (k, (fromJust(lookupM k mp))) : multiSetToListK ks mp
 
 --
 
@@ -58,6 +75,6 @@ addMS x (MS m) = if pertenece x (keys m)
                     then MS (assocM x ((ocurrencesMap x m) + 1) m)
                     else MS (assocM x 1 m)
 ocurrencesMS x (MS m) = ocurrencesMap x m
-unionMS (MS m1) (MS m2) = MS (mergeMaps m1 m2)
+unionMS (MS m1) (MS m2) = MS (unionMap (keys m1) (keys m2) m1 m2)
 intersectionMS (MS m1) (MS m2) = MS (intersectionMap (keys m1) (keys m2) m1 m2)
-multiSetToList (MS m) = mapToList m
+multiSetToList (MS m) = multiSetToListK (keys m) m
