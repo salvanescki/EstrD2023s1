@@ -28,8 +28,8 @@ Al heapsort aplicar ambas operaciones, su costo es O(n log n) mejorando de su an
 data Tree a = EmptyT | NodeT a (Tree a) (Tree a)
         deriving Show
 
-ejTree :: Tree Int 
-ejTree = (NodeT 8 
+ejBST :: Tree Int 
+ejBST = (NodeT 8 
             (NodeT 4
               (NodeT 2 
                 (NodeT 1 EmptyT EmptyT) 
@@ -51,6 +51,42 @@ ejTree = (NodeT 8
               )
             )
           )
+
+ejTree :: Tree Int
+ejTree = (NodeT 1 
+            (NodeT 2
+              (NodeT 3 
+                (NodeT 4 EmptyT EmptyT) 
+                (NodeT 5 EmptyT EmptyT)
+              )
+              (NodeT 6 
+                (NodeT 7 EmptyT EmptyT) 
+                (NodeT 8 EmptyT EmptyT)
+              )
+            )
+            (NodeT 9
+              (NodeT 10 
+                (NodeT 11 EmptyT EmptyT)  
+                (NodeT 12 EmptyT EmptyT)  
+              )
+              (NodeT 13 
+                (NodeT 14 EmptyT EmptyT)  
+                (NodeT 15 EmptyT EmptyT)  
+              )
+            )
+          )
+ejDesbalanceado :: Tree Int
+ejDesbalanceado = (NodeT 1 (NodeT 2 (NodeT 3 EmptyT EmptyT) EmptyT) EmptyT)
+-- Aux
+
+isEmpty :: Tree a -> Bool
+isEmpty EmptyT = True
+isEmpty _ = False
+
+heightT :: Tree a -> Int
+heightT EmptyT = 0
+heightT (NodeT _ EmptyT EmptyT) = 1
+heightT (NodeT _ lt rt) = 1 + max (heightT lt) (heightT rt)
 
 {- 
   Costo O(log N) ya que comprueba si el nodo actual es el que estamos buscando O(1), y luego verifica si el nodo actual es menor o mayor al que buscamos.
@@ -119,26 +155,86 @@ splitMaxBST :: Ord a => Tree a -> (a, Tree a)
 splitMaxBST (NodeT x lt EmptyT) = (x, lt)  
 splitMaxBST (NodeT x lt rt)     = let (m, rt') = splitMaxBST rt
                                    in (m, NodeT x lt rt')
+
+--
 {-
+  O(log N) ya que recorre una rama
+-}
 maxBST :: Ord a => Tree a -> a
 -- PRECOND: el árbol no está vacío
 maxBST (NodeT x _ EmptyT) = x
 maxBST (NodeT _ _ rt) = maxBST rt
 
+{-
+  O(log N) ya que recorre una rama
+-}
 minBST :: Ord a => Tree a -> a
 -- PRECOND: el árbol no está vacío
 minBST (NodeT x EmptyT _) = x
 minBST (NodeT _ lt _) = minBST lt
 
+{-
+  O(N) ya que revisa si el nodo pasado por parámetro es mayor a cada nodo del árbol
+-}
+
+esMayorA :: Ord a => a -> Tree a -> Bool
+esMayorA _ EmptyT = True
+esMayorA x' (NodeT x lt rt) = x > x' && esMayorA x' lt && esMayorA x' rt
+
+{-
+  O(N) ya que revisa si el nodo pasado por parámetro es menor a cada nodo del árbol
+-}
+
+esMenorA :: Ord a => a -> Tree a -> Bool
+esMenorA _ EmptyT = True
+esMenorA x' (NodeT x lt rt) = x < x' && esMenorA x' lt && esMenorA x' rt
+
+{-
+  O(N^2) ya que aplica 2 operaciones de costo lineal para cada nodo del árbol
+-}
+
 esBST :: Ord a => Tree a -> Bool
 -- PRECOND: el árbol no tiene elementos repetidos
 esBST EmptyT = True
-esBST (NodeT x lt rt) = x > maxBST lt && x < minBST rt && esBST lt && esBST rt
--}
+esBST (NodeT x lt rt) = esMayorA x lt && esBST lt && esMenorA x rt && esBST rt
+
+--
 {-
-elMaximoMenorA :: Ord a => a -> Tree a -> Maybe a
-
-elMinimoMayorA :: Ord a => a -> Tree a -> Maybe a
-
-balanceado :: Tree a -> Bool
+  O(1) ya que solo hace una comparación entre datos
 -}
+elegirMaxEntre :: Ord a => a -> Maybe a -> Maybe a
+elegirMaxEntre x Nothing = Just x
+elegirMaxEntre x (Just x') = Just (max x x')
+
+{-
+  O(log N) ya que recorre solo un camino del árbol
+-}
+elMaximoMenorA :: Ord a => a -> Tree a -> Maybe a
+elMaximoMenorA _ EmptyT = Nothing
+elMaximoMenorA x' (NodeT x lt rt) = if x < x'
+                                      then elegirMaxEntre x (elMaximoMenorA x' rt)
+                                      else elMaximoMenorA x' lt
+--
+
+{-
+  O(1) ya que solo hace una comparación entre datos
+-}
+elegirMinEntre :: Ord a => a -> Maybe a -> Maybe a
+elegirMinEntre x Nothing = Just x
+elegirMinEntre x (Just x') = Just (min x x')
+
+{-
+  O(log N) ya que recorre solo un camino del árbol
+-}
+elMinimoMayorA :: Ord a => a -> Tree a -> Maybe a
+elMinimoMayorA _ EmptyT = Nothing
+elMinimoMayorA x' (NodeT x lt rt) = if x' < x
+                                      then elegirMinEntre x (elMinimoMayorA x' lt)
+                                      else elMinimoMayorA x' rt
+--
+{-
+  O(N^2) ya que aplica heightT (costo lineal) en cada nodo
+-}
+balanceado :: Tree a -> Bool
+balanceado EmptyT = True
+balanceado (NodeT x lt rt) = heightT lt - heightT rt <= 1 && balanceado lt && balanceado rt
