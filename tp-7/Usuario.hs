@@ -463,8 +463,9 @@ convertirEnComodin :: CUIL -> Empresa -> Empresa
 convertirEnComodin c e = agregarEmpleado (todosLosSectores e) c e
 
 {-
-  buscarPorCUIL tiene costo O(log E), sectores
+  buscarPorCUIL tiene costo O(log E), sectores O(1), todosLosSectores O(S). Costo total O(S + log E), lineal
 -}
 esComodin :: CUIL -> Empresa -> Bool
+-- PRECOND: el CUIL tiene que corresponder a un Empleado en la Empresa
 esComodin c e = let empleado = (buscarPorCUIL c e)
                  in sectores empleado == todosLosSectores e
