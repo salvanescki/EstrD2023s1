@@ -1,3 +1,6 @@
+import Empresa --(Empresa, consEmpresa, buscarPorCUIL, empleadosDelSector, todosLosCUIL, todosLosSectores, agregarSector, agregarEmpleado, agregarASector, borrarEmpleado)
+import Empleado
+
 {-
 
 ------------------------------------- Ejercicio 1 -----------------------------------------------
@@ -406,3 +409,62 @@ ocurrencias :: String -> Map Char Int
 ocurrencias cs = ocurrenciasS (sinRepetidos cs) cs
 
 -}
+
+------------------------------------- Ejercicio 5 -----------------------------------------------
+
+type SectorId = Int
+type CUIL = Int
+
+{-
+  La cant de SectorIDs en la lista es S, la cant de CUILs en la lista es E
+
+  agregarSectores, por cada Sector de la lista aplica agregarSector, la cual tiene un costo O(log S)
+  agregarEmpleados, por cada CUIL de la lista aplica agregarEmpleado. Como la lista de CUILs termina teniendo la misma longitud que
+  la cant de Empleados la Empresa, el costo de agregarEmpleados es O(E log S + E log E)
+  comenzarCon, al aplicar ambas funciones a una empresa vacía, tiene un costo de O(E log S + E log E)
+-}
+agregarSectores :: [SectorId] -> Empresa -> Empresa
+-- OBSERVACIÓN: Los sectores no tienen empleados
+agregarSectores [] e = e
+agregarSectores (s:ss) e = agregarSector s (agregarSectores ss e)
+
+agregarEmpleados :: [CUIL] -> Empresa -> Empresa
+-- OBSERVACIÓN: Los empleados no tienen sectores asignados
+agregarEmpleados [] e = e
+agregarEmpleados (c:cs) e = agregarEmpleado [] c (agregarEmpleados cs e)
+
+comenzarCon :: [SectorId] -> [CUIL] -> Empresa
+-- PRECOND: Ninguna de las listas es vacía
+comenzarCon ss cs = agregarEmpleados cs (agregarSectores ss consEmpresa)
+
+{-
+  borrarEmpleado tiene un costo de O(M log S + M log E), siendo M la cant de sectores en las que trabajó el empleado, S los Sectores y E los Empleados.
+  borrarNEmpleados llama borrarEmpleado las N veces que le indiquemos por parámetro, su costo sería de O(N * M (log S + log E))
+  recorteDePersonal llama: 
+  * borrarNEmpleados con la mitad de los Empleados, es decir E/2
+  * length sobre todos los Empleados, O(E)
+  * todosLosCUIL, O(E) 2 veces
+  En total, su costo es O(3*E + E/2 * M (log S + log E)). Podría mejorarse si mejoro borrarEmpleado que es la función que más consume
+-}
+borrarNEmpleados :: Int -> [CUIL] -> Empresa -> Empresa
+borrarNEmpleados 0 _ e = e
+borrarNEmpleados n (c:cs) e = borrarEmpleado c (borrarNEmpleados (n - 1) cs e)
+
+recorteDePersonal :: Empresa -> Empresa
+recorteDePersonal e = borrarNEmpleados (div (length (todosLosCUIL e)) 2) (todosLosCUIL e) e
+
+{-
+  todosLosSectores tiene costo O(S)
+  agregarEmpleado por otra parte, tiene costo O(S log S + S log E) ya que lo estamos agregando a todos los Sectores (S)
+  Por lo tanto, el costo total es O(S + S log S + S log E), o también O(S * (1 + log S + log E)) un eneloguene
+-}
+convertirEnComodin :: CUIL -> Empresa -> Empresa
+-- OBSERVACIÓN: Considero que agregar el Empleado, pisa los datos antiguos
+convertirEnComodin c e = agregarEmpleado (todosLosSectores e) c e
+
+{-
+  buscarPorCUIL tiene costo O(log E), sectores
+-}
+esComodin :: CUIL -> Empresa -> Bool
+esComodin c e = let empleado = (buscarPorCUIL c e)
+                 in sectores empleado == todosLosSectores e
