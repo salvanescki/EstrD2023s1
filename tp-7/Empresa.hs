@@ -78,17 +78,21 @@ agregarSector s (ConsE ms mc) = ConsE (assocM s emptyS ms) mc
         * lookupM en el Map de SectorIDs (S Sectores), por lo que su costo es O(log S)
         * fromJust, O(1)
         * addS sobre el Set que devuelve lookupM, si consideramos el peor caso (que todos los empleados están trabajando en ese Sector) O(log E) en promedio
-        * incorporarSector tiene costo O(log S)
         * assocM, tiene costo O(log S) con (S Sectores)
     * agregarEmpleado, además de utilizar agregarEmpleadoASectores O(N (log S + log E)), utiliza un assocM en el Map de CUILs (E Empleados).
-      Por lo tanto, el costo final es O(N(log S + log E) + log E) aprox. O(N log S + N log E)
+    * incorporarSector tiene costo O(log S) e incorporarSectores O(S log S)
+      Por lo tanto, el costo final es O(N(log S + log E) + log E) aprox. O(S log S + N log E)
 -}
+incorporarSectores :: [SectorId] -> Empleado -> Empleado
+incorporarSectores [] e = e
+incorporarSectores (s:ss) e = incorporarSector s (incorporarSectores ss e)
+
 agregarEmpleadoASectores :: Empleado -> [SectorId] -> Map SectorId (Set Empleado) -> Map SectorId (Set Empleado)
 agregarEmpleadoASectores e []     ms  = ms
-agregarEmpleadoASectores e (s:ss) ms = assocM s (addS (incorporarSector s e) (fromJust(lookupM s ms))) (agregarEmpleadoASectores e ss ms)
+agregarEmpleadoASectores e (s:ss) ms = assocM s (addS e (fromJust(lookupM s ms))) (agregarEmpleadoASectores e ss ms)
 
 agregarEmpleado :: [SectorId] -> CUIL -> Empresa -> Empresa
-agregarEmpleado ss c (ConsE ms mc) = let empleado = (consEmpleado c)
+agregarEmpleado ss c (ConsE ms mc) = let empleado = (incorporarSectores ss (consEmpleado c))
                                       in ConsE (agregarEmpleadoASectores empleado ss ms) (assocM c empleado mc)
 
 {-
