@@ -1,9 +1,6 @@
-import MapV3 -- Map, emptyM, assocM, lookupM, deleteM, keys
-import SetV1
-
 {-
 
-Ejercicio 1:
+------------------------------------- Ejercicio 1 -----------------------------------------------
 
 Considerando que al implementar heapsort, utilicé priorityQueueToList y listToProrityQueue, calculo sus costos (siempre en el peor caso):
 
@@ -21,7 +18,7 @@ Al heapsort aplicar ambas operaciones, su costo es O(n log n) mejorando de su an
 
 -}
 
--- Ejercicio 2
+------------------------------------- Ejercicio 2 -----------------------------------------------
 
 {- 
   Para todas las funciones siguientes, N refiere al número de elementos del árbol. Además el árbol es un BST y no tiene elementos repetidos.
@@ -242,7 +239,7 @@ balanceado :: Tree a -> Bool
 balanceado EmptyT = True
 balanceado (NodeT x lt rt) = heightT lt - heightT rt <= 1 && balanceado lt && balanceado rt
 
--- Ejercicio 3
+------------------------------------- Ejercicio 3 -----------------------------------------------
 
 {-
   De la consigna, los costos son:
@@ -254,20 +251,21 @@ balanceado (NodeT x lt rt) = heightT lt - heightT rt <= 1 && balanceado lt && ba
   Siendo K la cantidad de claves del Map
 -}
 
--- Aux
+{- Aux
 
-pertenece :: Eq a => a -> [a] -> Bool
+pertenece :: Eq a => a -> [a] -> Bool   -- O(n)
 pertenece _ [] = False
 pertenece e (x:xs) = e == x || pertenece e xs
 
-fromJust :: Maybe a -> a
+fromJust :: Maybe a -> a                -- O(1)
 -- PRECOND: No puede ser Nothing
 fromJust (Just x) = x
+
+-}
 
 {-
 valuesK, por cada clave del Map (K claves) aplica lookupM, una operación de costo O(log K). Por lo que su costo es O(K log K)
 valuesM, utiliza 1 vez la función keys, la cual cuesta O(K), y valuesK, O(K log K). Por lo que, valuesM tiene un costo de O(K log K).
--}
 
 valuesK :: Ord k => [k] -> Map k v -> [Maybe v]         
 valuesK [] _ = []
@@ -275,6 +273,7 @@ valuesK (k:ks) mp = lookupM k mp : valuesK ks mp
 
 valuesM :: Ord k => Map k v -> [Maybe v]                
 valuesM mp = valuesK (keys mp) mp
+-}
 
 --
 {-
@@ -282,21 +281,21 @@ Por cada elemento de la lista de claves ingresada por el Usuario ("m" claves), t
 y a pertenece sobre la lista que devuelve keys (K claves), lo que también cuesta en el peor caso O(K).
 Costo O(m * K) con m las claves de la lista ingresada por el Usuario y K la cantidad de claves del Map.
 El peor caso, donde el Usuario ingresa una lista con todas las claves del Map sería O(K^2)
--}
+
 todasAsociadas :: Ord k => [k] -> Map k v -> Bool
 todasAsociadas [] _ = True
 todasAsociadas (k:ks) mp = pertenece k (keys mp) && todasAsociadas ks mp
-
+-}
 --
 {-
 Considerando la cantidad de pares de la lista como K, ya que luego va a ser la misma cantidad de claves del Map resultante,
 listToMap llama assocM, función de costo O(log K), por cada llamado recursivo (el cual se hace K veces).
 Esto resulta en un costo de O(K log K)
--}
+
 listToMap :: Ord k => [(k, v)] -> Map k v
 listToMap [] = emptyM
 listToMap ((k,v):kvs) = assocM k v (listToMap kvs)
-
+-}
 --
 {-
 Similar a lo anterior, la lista resultante va a tener la misma cantidad de claves que el Map (K claves).
@@ -304,14 +303,14 @@ mapToListK llama K veces a la función lookupM, de costo O(log K) y a fromJust, 
 Por lo que mapToListK tiene un costo de O(K log K).
 mapToList llama 1 vez a keys, costo O(K) y a mapToListK, costo O(K log K).
 Por lo tanto, el costo de mapToList es de O(K log K)
--}
+
 mapToListK :: Ord k => [k] -> Map k v -> [(k, v)]
 mapToListK [] _ = []
 mapToListK (k:ks) mp = (k, fromJust(lookupM k mp)) : mapToListK ks mp
 
 mapToList :: Ord k => Map k v -> [(k, v)]
 mapToList mp = mapToListK (keys mp) mp
-
+-}
 --
 {-
 Al igual que en las dos funciones anteriores, la cantidad de pares de la lista es K, ya que va a resultar en K claves del Map.
@@ -328,24 +327,24 @@ Por lo tanto, para cada par de la lista (K pares), agruparEq aplica o:
 * O(K) + O(K) + O(log K)
 * O(K) + O(K) + O(log K) + O(log K) + O(1) + O(1)
 agruparEq tiene un costo de O(K^2)
--}
+
 agruparEq :: Ord k => [(k, v)] -> Map k [v]
 agruparEq [] = emptyM
 agruparEq ((k,v): kvs) = if pertenece k (keys (agruparEq kvs))
                             then assocM k (v : fromJust(lookupM k (agruparEq kvs))) (agruparEq kvs)
                             else assocM k [v] (agruparEq kvs)
-
+-}
 --
 {-
 Siendo m la cantidad de claves en la lista pasada por el Usuario,
 incrementar aplica, por cada clave de esa lista (m claves): assocM, de costo O(log K); fromJust, O(1); y lookupM, O(log K).
 Por lo tanto, tiene un costo de O(m log K). En el peor caso, que la lista tenga todas las claves del Map, su costo sería O(K log K).
--}
+
 incrementar :: Ord k => [k] -> Map k Int -> Map k Int
 -- PRECOND: Las keys de la lista deben pertenecer al map
 incrementar [] _ = emptyM
 incrementar (k:ks) mp = assocM k (1 + fromJust(lookupM k mp)) (incrementar ks mp)
-
+-}
 --
 {-
 Siendo K la cantidad de claves del primer Map y K' la cantidad del segundo,
@@ -353,23 +352,25 @@ mergeMapsK aplica, por cada clave del primer Map (K claves): assocM, de costo O(
 En total un costo de O(K log K).
 mergeMaps a su vez, aplica 1 vez keys en el primer Map, costo O(K) y mergeMapsK O(K log K).
 Por lo tanto, mergeMaps tiene un costo de O(K log K)
--}
+
 mergeMapsK:: Ord k => [k] -> Map k v -> Map k v -> Map k v
 mergeMapsK [] _ m2 = m2
 mergeMapsK (k:ks) m1 m2 = assocM k (fromJust(lookupM k m1)) (mergeMapsK ks m1 m2)
 
 mergeMaps:: Ord k => Map k v -> Map k v -> Map k v
 mergeMaps m1 m2 = mergeMapsK (keys m1) m1 m2
+-}
 
 --
 {-
 indexar toma una lista de elementos que pasa el Usuario y crea un Map con ellos, para comodidad digo que son K elementos.
 En el proceso, para cada elemento de la lista (K elementos), aplica: assocM, O(log K); keys, O(K); y length sobre la lista que devuelve keys (K elementos), O(K).
 Como aplica estas operaciones para cada elemento de la lista, indexar tiene un costo de O(K^2).
--}
+
 indexar :: [a] -> Map Int a
 indexar [] = emptyM
 indexar (x:xs) = assocM (length (keys(indexar xs))) x (indexar xs)
+-}
 
 {-
 Al igual que en la función anterior, K es la cantidad de caracteres del String pasado por el Usuario.
@@ -381,7 +382,7 @@ sinRepetidosS aplica, por cada caracter del String (n chars) addS, la cual su co
 sinRepetidos aplica 1 vez setToList, O(1) y sinRepetidosS que puede variar entre O(1) y O(n)
 ocurrencias, aplica 1 vez ocurrenciasS, de costo O(n * K), y sinRepetidos, de costo dependiente de la implementación de Set (O(1)~O(n))
 En todos los casos, ocurrencias tiene un costo de O(n * K).
--}
+
 unoSiCeroSino :: Bool -> Int -- O(1)
 unoSiCeroSino True = 1
 unoSiCeroSino False = 0
@@ -403,3 +404,5 @@ ocurrenciasS (c:cs) s = assocM c (apariciones c s) (ocurrenciasS cs s)
 
 ocurrencias :: String -> Map Char Int
 ocurrencias cs = ocurrenciasS (sinRepetidos cs) cs
+
+-}
