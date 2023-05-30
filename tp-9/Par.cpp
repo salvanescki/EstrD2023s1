@@ -1,10 +1,7 @@
 #include <iostream>
-using namespace std;
+#include "Par.h"
 
-typedef struct Par {
-    int x;
-    int y;
-};
+using namespace std;
 
 Par consPar(int x, int y){
     Par par;
