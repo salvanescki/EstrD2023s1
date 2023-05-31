@@ -9,16 +9,16 @@ struct ArrayListSt {
     int capacidad; // tamaño del array
 };
 
-ArrayList newArrayList(){
-    return newArrayListWith(16);
-}
-
 ArrayList newArrayListWith(int capacidad){
     ArrayListSt* xs = new ArrayListSt;
     xs->cantidad = 0;
     xs->elementos = new int[capacidad];
     xs->capacidad = capacidad;
     return xs;
+}
+
+ArrayList newArrayList(){
+    return newArrayListWith(16);
 }
 
 int lengthAL(ArrayList xs){
@@ -40,7 +40,7 @@ void resize(int capacidad, ArrayList xs){
         temp[i] = xs->elementos[i];
     }
     delete xs->elementos;
-    xs->capacidad = capacidad;
+    xs->capacidad = length;
     xs->elementos = temp;
 }
 
@@ -48,7 +48,7 @@ void add(int x, ArrayList xs){
     if(xs->cantidad == xs->capacidad){
         resize(xs->capacidad * 2, xs);
     }
-    xs->elementos[xs->cantidad++] = x;
+    xs->elementos[xs->cantidad] = x;
     xs->cantidad++;
 }
 
