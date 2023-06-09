@@ -2,6 +2,8 @@
 #include "LinkedListV2.h"
 #include "Set.h"
 #include "Queue.h"
+#include "Tree.h"
+#include "ArrayList.h"
 
 using namespace std;
 
@@ -23,6 +25,12 @@ void ShowList(LinkedList xs) {
   }
   cout << " ]" << endl;
 }
+
+int unoSi(bool p){
+    return p? 1: 0;
+}
+
+/*---------------------------------------- LINKED LIST ------------------------------------------------*/
 
 // Devuelve la suma de todos los elementos.
 // EFICIENCIA: O(n), n el tamaño de la lista. Ya que, recorre linealmente la lista mediante el iterador
@@ -123,6 +131,126 @@ void UserAppend(LinkedList xs, LinkedList ys){
     DisposeIterator(iys);
     DestroyL(ys);
 }
+
+/*------------------------------------ ÁRBOLES RECURSIVO -----------------------------------------*/
+
+// Dado un árbol binario de enteros devuelve la suma entre sus elementos.
+int rSumarT(Tree t){
+    if(isEmptyT(t)) return 0;
+    return rootT(t) + rSumarT(left(t)) + rSumarT(right(t));
+}
+
+// Dado un árbol binario devuelve su cantidad de elementos, es decir, el tamaño del árbol (size
+// en inglés).
+int rSizeT(Tree t){
+    if(isEmptyT(t)) return 0;
+    return 1 + rSizeT(left(t)) + rSizeT(right(t));
+}
+
+// Dados un elemento y un árbol binario devuelve True si existe un elemento igual a ese en el
+// árbol.
+bool rPerteneceT(int e, Tree t){
+    if (isEmptyT(t)) return false;
+    return rootT(t) == e || rPerteneceT(e, left(t)) || rPerteneceT(e, right(t));
+}
+
+// Dados un elemento e y un árbol binario devuelve la cantidad de elementos del árbol que son
+// iguales a e.
+int rAparicionesT(int e, Tree t){
+    if (isEmptyT(t)) return 0;
+    return unoSi(rootT(t) == e) + rAparicionesT(e, left(t)) + rAparicionesT(e, right(t));
+}
+
+// Dado un árbol devuelve su altura.
+int rHeightT(Tree t){
+    if (isEmptyT(t)) return 0;
+    return 1 + max(rHeightT(left(t)),rHeightT(right(t)));
+}
+
+void recToList(Tree t, ArrayList xs){
+    if (!isEmptyT(t)){
+        recToList(left(t), xs);
+        add(rootT(t), xs);
+        recToList(right(t), xs);
+    }
+}
+
+// Dado un árbol devuelve una lista con todos sus elementos.
+ArrayList rToList(Tree t){
+    ArrayList xs = newArrayList();
+    recToList(t, xs);
+    return xs;
+}
+
+bool isLeaf(Tree t){
+    return left(t) == NULL && right(t) == NULL;
+}
+
+void recLeaves(Tree t, ArrayList xs){
+    if(!isEmptyT(t)){
+        recLeaves(left(t), xs);
+        if(isLeaf(t)){
+            add(rootT(t), xs);
+        }
+        recLeaves(right(t), xs);
+    }
+}
+
+// Dado un árbol devuelve los elementos que se encuentran en sus hojas.
+ArrayList rLeaves(Tree t){
+    ArrayList xs = newArrayList();
+    recLeaves(t, xs);
+    return xs;
+}
+
+void recLevelN(int n, Tree t, ArrayList xs){
+    if (n > 0){
+        recLevelN(n-1, left(t), xs);
+        recLevelN(n-1, right(t), xs);
+    } else {
+        add(rootT(t), xs);
+    }
+}
+
+// Dados un número n y un árbol devuelve una lista con los nodos de nivel n
+ArrayList rLevelN(int n, Tree t){
+    ArrayList xs = newArrayList();
+    recLevelN(n, t, xs);
+    return xs;
+}
+
+/*------------------------------------ ÁRBOLES ITERATIVO -----------------------------------------*/
+
+// Dado un árbol binario de enteros devuelve la suma entre sus elementos.
+int iSumarT(Tree t){
+
+
+}
+
+// Dado un árbol binario devuelve su cantidad de elementos, es decir, el tamaño del árbol (size
+// en inglés).
+int iSizeT(Tree t){
+    
+}
+
+// Dados un elemento y un árbol binario devuelve True si existe un elemento igual a ese en el
+// árbol.
+bool iPerteneceT(int e, Tree t){
+    
+}
+
+// Dados un elemento e y un árbol binario devuelve la cantidad de elementos del árbol que son
+// iguales a e.
+int iAparicionesT(int e, Tree t){
+    
+}
+
+// Dado un árbol devuelve una lista con todos sus elementos.
+ArrayList iToList(Tree t){
+    
+}
+
+/*-------------------------------------------- MAIN ----------------------------------------------------*/
 
 int main(){
     LinkedList xs = nil();
