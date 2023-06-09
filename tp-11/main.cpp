@@ -1,11 +1,25 @@
 #include<iostream>
-#include "LinkedList.h"
+#include "LinkedListV2.h"
 
 using namespace std;
 
 //AUX
 string status(bool test){
     return test? "OK" : "ERROR";
+}
+
+void ShowList(LinkedList xs) {
+  ListIterator ixs = getIterator(xs);
+  cout << "[";
+  if (!atEnd(ixs)) {
+    cout << " " << current(ixs);
+    Next(ixs);
+  }
+  while (!atEnd(ixs)) {  
+    cout << ", " << current(ixs);
+    Next(ixs);
+  }
+  cout << " ]" << endl;
 }
 
 // Devuelve la suma de todos los elementos.
@@ -98,7 +112,7 @@ LinkedList copy(LinkedList xs){
 // La segunda lista se destruye.
 // EFICIENCIA: O(m*n), siendo m la cantidad de nodos de ys y, por cada uno de ellos, se llama a Snoc
 // la cual, ahora mismo tiene un costo de O(n). Podría mejorar a costo O(m) si Snoc fuera de costo O(1).
-void Append(LinkedList xs, LinkedList ys){
+void UserAppend(LinkedList xs, LinkedList ys){
     ListIterator iys = getIterator(ys);
     while(!atEnd(iys)){
         Snoc(current(iys), xs);
@@ -123,5 +137,39 @@ int main(){
 
     cout << "Pruebas de LinkedList: " << endl;
     cout << "test1 = " << status(test1) << " \ntest2 = " << status(test2) << " \ntest3 = " << status(test3) << " \ntest4 = " << status(test4) << endl;   
+    
+    LinkedList ys = nil();
+    for(int i = 1000; i >= 900; i--){
+        Cons(i, ys);
+    }
+
+    LinkedList zs = nil();
+    for(int i = 1100; i > 1000; i--){
+        Cons(i, zs);
+    }
+    
+    cout << "Prueba de append usuario" << endl;
+    UserAppend(ys,zs);
+    ShowList(ys);
+
+    LinkedList as = nil();
+    for(int i = 1000; i >= 900; i--){
+        Cons(i, as);
+    }
+
+    LinkedList bs = nil();
+    for(int i = 1100; i > 1000; i--){
+        Cons(i, bs);
+    }
+
+    cout << "Prueba de append interfaz" << endl;
+    Append(as,bs);
+    ShowList(as);
+
+    DestroyL(xs);
+    DestroyL(ys);
+    DestroyL(zs);
+    DestroyL(as);
+    DestroyL(bs);
 
 }
