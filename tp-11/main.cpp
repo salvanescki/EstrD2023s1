@@ -1,6 +1,7 @@
 #include <iostream>
 #include "LinkedListV2.h"
 #include "Set.h"
+#include "Queue.h"
 
 using namespace std;
 
@@ -205,5 +206,39 @@ int main(){
 
     DestroyS(emptySet);
     DestroyS(set1);
+
+    Queue q1 = emptyQ();
+    
+    bool qTest1 = isEmptyQ(q1);
+
+    for(int i = 0; i < 10; i++){
+        Enqueue(i, q1);
+    }
+
+    bool qTest2 = !isEmptyQ(q1) && lengthQ(q1) == 10;
+    bool qTest3 = firstQ(q1) == 0;
+    Dequeue(q1);
+    bool qTest4 = firstQ(q1) == 1 && lengthQ(q1) == 9;
+
+    Queue q2 = emptyQ();
+
+    for(int i = 10; i < 20; i++){
+        Enqueue(i, q2);
+    }
+
+    MergeQ(q1, q2);
+    bool qTest5 = lengthQ(q1) == 19;
+
+    for(int i = 0; i < 9; i++){
+        Dequeue(q1);
+    }
+
+    bool qTest6 = firstQ(q1) == 10;
+
+    cout << "Pruebas de Queue: " << endl;
+    cout << "qTest1 = " << status(qTest1) << " \nqTest2 = " << status(qTest2) << " \nqTest3 = " << status(qTest3) 
+    << " \nqTest4 = " << status(qTest4) << " \nqTest5 = " << status(qTest5) << " \nqTest6 = " << status(qTest6) << endl;
+
+    DestroyQ(q1);
 
 }
