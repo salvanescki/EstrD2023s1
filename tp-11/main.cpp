@@ -1,5 +1,6 @@
-#include<iostream>
+#include <iostream>
 #include "LinkedListV2.h"
+#include "Set.h"
 
 using namespace std;
 
@@ -128,15 +129,15 @@ int main(){
         Cons(i, xs);
     }
 
-    bool test1 = sumatoria(xs) == 5050;
+    bool listTest1 = sumatoria(xs) == 5050;
     Sucesores(xs);
-    bool test2 = head(xs) == 2 && pertenece(101, xs);
+    bool listTest2 = head(xs) == 2 && pertenece(101, xs);
     Cons(101, xs);
-    bool test3 = apariciones(101,xs) == 2;
-    bool test4 = minimo(xs) == 2;
+    bool listTest3 = apariciones(101,xs) == 2;
+    bool listTest4 = minimo(xs) == 2;
 
     cout << "Pruebas de LinkedList: " << endl;
-    cout << "test1 = " << status(test1) << " \ntest2 = " << status(test2) << " \ntest3 = " << status(test3) << " \ntest4 = " << status(test4) << endl;   
+    cout << "listTest1 = " << status(listTest1) << " \nlistTest2 = " << status(listTest2) << " \nlistTest3 = " << status(listTest3) << " \nlistTest4 = " << status(listTest4) << endl;   
     
     LinkedList ys = nil();
     for(int i = 1000; i >= 900; i--){
@@ -171,5 +172,38 @@ int main(){
     DestroyL(zs);
     DestroyL(as);
     DestroyL(bs);
+
+    Set emptySet = emptyS();
+    
+    bool setTest1 = isEmptyS(emptySet);
+
+    Set set1 = emptyS();
+    for(int i = 0; i < 10; i++){
+        AddS(1, set1);
+    }
+
+    bool setTest2 = !isEmptyS(set1);
+    bool setTest3 = belongsS(1, set1);
+    RemoveS(1, set1);
+    bool setTest4 = isEmptyS(set1);
+    bool setTest5 = sizeS(set1) == 0;
+    AddS(1, set1);
+    bool setTest6 = sizeS(set1) == 1;
+    AddS(1, set1);
+    bool setTest7 = sizeS(set1) == 1;
+    AddS(2, set1);
+    bool setTest8 = sizeS(set1) == 2;
+
+    cout << "Pruebas de Set: " << endl;
+    cout << "setTest1 = " << status(setTest1) << " \nsetTest2 = " << status(setTest2) << " \nsetTest3 = " << status(setTest3) 
+    << " \nsetTest4 = " << status(setTest4) << " \nsetTest5 = " << status(setTest5) << " \nsetTest6 = " << status(setTest6) 
+    << " \nsetTest7 = " << status(setTest7) << " \nsetTest8 = " << status(setTest8) << endl;
+
+    AddS(3, set1);
+    cout << "Set {1, 2, 3}: " << endl;
+    ShowList(setToList(set1));
+
+    DestroyS(emptySet);
+    DestroyS(set1);
 
 }

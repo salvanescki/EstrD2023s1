@@ -31,7 +31,7 @@ void Tail(LinkedList xs);
 int length(LinkedList xs);
 
 // Agrega un elemento al final de la lista.
-// EFICIENCIA: O(n), n el tamaño de la lista.
+// EFICIENCIA: O(1)
 void Snoc(int x, LinkedList xs);
 
 // Apunta el recorrido al primer elemento.
